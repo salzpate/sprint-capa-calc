@@ -1,4 +1,4 @@
-name: Linux JAR and Native
+name: MacOS
 
 on:
   push:
