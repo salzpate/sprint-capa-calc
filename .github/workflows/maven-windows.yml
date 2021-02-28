@@ -1,0 +1,43 @@
+name: Linux JAR and Native
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Visual Studio shell
+      uses: egor-tensin/vs-shell@v1
+    - name: Setup Graalvm
+      id: setup-graalvm
+      uses: DeLaGuardo/setup-graalvm@master
+      with:
+        graalvm-version: '21.0.0.java11'
+    - name: Install native-image component
+      run: gu install native-image
+    - name: APT update
+      run: sudo apt update
+    - name: Install libraries
+      run: sudo apt install libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev libgtk-3-dev libpango1.0-dev libxtst-dev
+    - name: Make staging directory
+      run: mkdir staging
+    - name: Build JAR with Maven
+      run: mvn -B package
+    - name: Copy JAR to staging
+      run: cp target/*.jar staging
+    - name: Gluon Build
+      run: mvn client:build
+    - name: Copy native client to staging
+      run: cp -r target/client/x86_64-windows/*.exe staging
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Package
+        path: staging
