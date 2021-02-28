@@ -31,5 +31,7 @@ jobs:
       - name: Install native-image component
         run: |
           ${{ matrix.gu-binary }} install native-image
-      - name: Build with Maven
+      - name: Build and Test with Maven
         run: mvn clean test
+      - name: Build native images
+        run: mvn client:build
