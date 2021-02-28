@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>de.salzpaten.tools</groupId>
+  <artifactId>sprintcapacalc</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>Sprint capacity calculator</name>
+  <description>A tool for calculating sprint capacities in a front-end and back-end team.</description>
+  <inceptionYear>2021</inceptionYear>
+
+  <scm>
+    <connection>scm:git:https://github.com/salzpate/sprint-capa-calc</connection>
+    <developerConnection>scm:git:https://github.com/salzpate/sprint-capa-calc</developerConnection>
+    <url>scm:git:https://github.com/salzpate/sprint-capa-calc</url>
+  </scm>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <org-openjfx.version>15.0.1</org-openjfx.version>
+    <org-openjfx-javafx-maven-plugin.version>0.0.5</org-openjfx-javafx-maven-plugin.version>
+    <com-gluonhq-client-maven-plugin.version>0.1.38</com-gluonhq-client-maven-plugin.version>
+    <org-junit-jupiter.version>5.7.1</org-junit-jupiter.version>
+    <org-junit-platform.version>1.7.1</org-junit-platform.version>
+    <module.name>de.salzpaten.tools.scc</module.name>
+    <main.class>de.salzpaten.tools.scc.SccApp</main.class>
+  </properties>
+  <dependencies>
+
+    <!-- Java FX -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${org-openjfx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${org-openjfx.version}</version>
+    </dependency>
+
+    <!-- Test -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${org-junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${org-junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>${org-junit-platform.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-runner</artifactId>
+      <version>${org-junit-platform.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>${org-openjfx-javafx-maven-plugin.version}</version>
+        <configuration>
+          <jlinkImageName>${module.name}</jlinkImageName>
+          <launcher>launcher</launcher>
+          <mainClass>${module.name}/${main.class}</mainClass>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.gluonhq</groupId>
+        <artifactId>client-maven-plugin</artifactId>
+        <version>${com-gluonhq-client-maven-plugin.version}</version>
+        <configuration>
+          <target>host</target>
+          <mainClass>${module.name}/${main.class}</mainClass>
+          <bundlesList>
+            <list>de.salzpaten.tools.scc.controller.main</list>
+          </bundlesList>
+          <reflectionList>
+            <list>de.salzpaten.tools.scc.controller.MainController</list>
+            <list>javafx.scene.control.TableColumnBase</list>
+            <list>javafx.scene.control.TableColumn</list>
+            <list>javafx.scene.control.TableView</list>
+          </reflectionList>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
