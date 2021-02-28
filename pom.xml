@@ -6,7 +6,7 @@
   <version>1.0.0</version>
   <packaging>jar</packaging>
 
-  <name>Sprint capacity calculator</name>
+  <name>SprintCapaCalc</name>
   <description>A tool for calculating sprint capacities in a front-end and back-end team.</description>
   <inceptionYear>2021</inceptionYear>
 
