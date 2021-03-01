@@ -3,7 +3,7 @@ A tool for calculating sprint capacities in a front-end and back-end team.
 
 The desktop application is written with JavaFX and is generated as native using GraalVM.
 
-![SCC](https://user-images.githubusercontent.com/57270302/109551322-b564cb00-7ad0-11eb-8145-2cd784d36e3c.png "SCC")
+![SCC](https://user-images.githubusercontent.com/57270302/109552345-f01b3300-7ad1-11eb-9d07-e53022e3b1ea.png "SCC")
 
 ## Features
 
