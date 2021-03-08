@@ -26,11 +26,7 @@
 
 .sidebar-textfield-focus {
   -fx-highlight-fill: -fx-accent;
-  -fx-background-color:
-        -fx-focus-color,
-        #e2dcdd,
-        -fx-faint-focus-color,
-       #e2dcdd;
+  -fx-background-color: -fx-focus-color, #e2dcdd, -fx-faint-focus-color, #e2dcdd;
   -fx-background-insets: -0.2, 1, -1.4, 3;
   -fx-background-radius: 6 6 6 6;
 }
@@ -39,20 +35,24 @@
   -fx-background-color: transparent;
 }
 
+.sidebar-button {
+  -fx-background-color: transparent;
+}
+
+.sidebar-button:hover {
+  -fx-background-color: #e2dcdd;
+}
+
+
 .main-textfield {
-  -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -10%), -fx-text-box-border),
-        linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
+  -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -10%), -fx-text-box-border), linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
   -fx-background-insets: 0, 1;
   -fx-background-radius: 6 6 6 6;
 }
 
 .main-textfield-focus {
   -fx-highlight-fill: -fx-accent;
-  -fx-background-color:
-        -fx-focus-color,
-        -fx-control-inner-background,
-        -fx-faint-focus-color,
-        linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
+  -fx-background-color: -fx-focus-color, -fx-control-inner-background, -fx-faint-focus-color, linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
   -fx-background-insets: -0.2, 1, -1.4, 3;
   -fx-background-radius: 6 6 6 6;
 }
@@ -93,8 +93,11 @@
     -fx-background-color: -fx-inner-border, #ffffff;
 }
 
-.column-bold {
+#main .table-view .table-cell {
   -fx-font-family: "Arial";
+}
+
+.column-bold {
   -fx-font-weight: bold;
 }
 
@@ -102,12 +105,7 @@
   -fx-alignment: CENTER-RIGHT;
 }
 
-.column-sum {
-  -fx-font-family: "Arial";
-}
-
 .column-sum-right {
-  -fx-font-family: "Arial";
   -fx-alignment: CENTER-RIGHT;
 }
 

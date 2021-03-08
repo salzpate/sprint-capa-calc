@@ -14,6 +14,23 @@ The desktop application is written with JavaFX and is generated as native using 
 - Calculation and display of the planned and the total time used.
 - Copy the task list to the clipboard.
 
+### Jira Extension
+
+The Jira extension can be activated via scc.properties. This will expand the Add input field. If a Jira ID is recognized after an input (only one word with -), the data record is loaded via the Jira API and the name and person Days are filled. Using the prefix jql: a JQL query can also serve as a basis. If no value is set for the person days, these will not be filled automatically.
+
+
+*scc.properties*:
+
+| Name                  | Default | Desciption                                                      | Example                         |
+|-----------------------|---------|-----------------------------------------------------------------|---------------------------------|
+| jira.enabled          | false   | Enable Jira Extention                                           | true                            |
+| jira.api.url          |         | Url of Jira rest API                                            | http://localhost:8080/rest/api/ |
+| jira.api.version      | latest  | Version of Jira rest API                                        | 2                               |
+| jira.auth.method      |         | Authentifcation Method: Bearer or Basic                         | Basic                           |
+| jira.auth.token       |         | Authentifcation Token, by Basic use Base64 of username:password | dXNlcm5hbWU6cGFzc3dvcmQ=        |
+| jira.field.name       | summary | Name field of Jira rest response                                | summary                         |
+| jira.field.personDays |         | Name field of Jira rest response                                | customfield_10106               |
+
 
 ## Installtion
 
@@ -46,6 +63,7 @@ mvn client:run
 - [Maven plugin for JavaFX](https://github.com/openjfx/javafx-maven-plugin)
 - [Gluon](https://gluonhq.com)
 - [Gluon Client plugin for Maven](https://github.com/gluonhq/client-maven-plugin)
+- [Heroicons](https://heroicons.com)
 
 ## License
 Sprint Capacity Calculator is Open Source software released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].

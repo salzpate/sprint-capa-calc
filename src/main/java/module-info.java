@@ -23,6 +23,8 @@ module de.salzpaten.tools.scc {
 	requires transitive javafx.graphics;
 	requires javafx.controls;
 	requires javafx.fxml;
+	requires java.net.http;
+	requires com.google.gson;
 
 	opens de.salzpaten.tools.scc to javafx.fxml;
 	opens de.salzpaten.tools.scc.controller to javafx.fxml;
@@ -32,4 +34,7 @@ module de.salzpaten.tools.scc {
 
 	exports de.salzpaten.tools.scc;
 	exports de.salzpaten.tools.scc.controller;
+	exports de.salzpaten.tools.scc.domain;
+	exports de.salzpaten.tools.scc.service;
+	exports de.salzpaten.tools.scc.service.impl;
 }

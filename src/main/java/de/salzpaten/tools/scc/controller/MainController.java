@@ -15,16 +15,22 @@
  */
 package de.salzpaten.tools.scc.controller;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.salzpaten.tools.scc.domain.CalcTableData;
 import de.salzpaten.tools.scc.domain.CapaData;
+import de.salzpaten.tools.scc.service.DataService;
 import de.salzpaten.tools.scc.table.SumDoubleCell;
 import de.salzpaten.tools.scc.table.SumStringCell;
 import de.salzpaten.tools.scc.utils.SccUtils;
@@ -35,24 +41,31 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.shape.SVGPath;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 
 /**
  * Main controller of the FXML Application
@@ -62,10 +75,29 @@ import javafx.scene.shape.SVGPath;
  */
 public class MainController implements Initializable {
 
+	/**
+	 * Standard Logger for GraalVM
+	 */
+	private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
+
+	@FXML
+	private Button bClear;
+
+	@FXML
+	private Button bCopyAsList;
+
+	@FXML
+	private Button bCopyAsMarkdown;
+
+	@FXML
+	private Button bCopyAsTable;
+
 	private CapaData capaData = new CapaData(0d, 0d, 0d);
 
 	@FXML
 	private CheckBox cbCalc;
+
+	private DataService dataService;
 
 	private ObjectBinding<Double> freeCapaBackendBinding;
 
@@ -77,6 +109,9 @@ public class MainController implements Initializable {
 
 	@FXML
 	private TableView<CalcTableData> mainTable;
+
+	@FXML
+	private ProgressIndicator pJiraIndicator;
 
 	private ObjectBinding<Double> plannedCapaBackendBinding;
 
@@ -92,13 +127,13 @@ public class MainController implements Initializable {
 	private ObservableList<CalcTableData> tableData;
 
 	@FXML
+	private TableColumn<CalcTableData, Boolean> tcActive;
+
+	@FXML
 	private TableColumn<CalcTableData, Double> tcBackend;
 
 	@FXML
 	private TableColumn<CalcTableData, Double> tcFrontend;
-
-	@FXML
-	private TableColumn<CalcTableData, Boolean> tcActive;
 
 	@FXML
 	private TableColumn<CalcTableData, String> tcName;
@@ -119,22 +154,22 @@ public class MainController implements Initializable {
 	private TableColumn<CalcTableData, Double> tcSumPersonDays;
 
 	@FXML
+	private AnchorPane tfBackendPane;
+
+	@FXML
 	private TextField tfCapaBackend;
 
 	@FXML
 	private TextField tfCapaFrontend;
 
 	@FXML
+	private AnchorPane tfFrontendPane;
+
+	@FXML
 	private TextField tfName;
 
 	@FXML
 	private AnchorPane tfNamePane;
-
-	@FXML
-	private AnchorPane tfBackendPane;
-
-	@FXML
-	private AnchorPane tfFrontendPane;
 
 	/**
 	 * Bind all table fields
@@ -151,6 +186,98 @@ public class MainController implements Initializable {
 			freeCapaTableData.backendProperty().bind(freeCapaBackendBinding);
 			freeCapaTableData.frontendProperty().bind(freeCapaFrontendBinding);
 		});
+	}
+
+	/**
+	 * Generates a task that loads items from Jira using an ID or a JQL query
+	 *
+	 * @param jqlText jqlText
+	 * @return Task
+	 */
+	private Task<Void> buildJiraTask(String jqlText) {
+		return new Task<Void>() {
+
+			private List<CalcTableData> filteredList;
+
+			private boolean isJql = jqlText.contains("=");
+
+			@Override
+			protected Void call() throws Exception {
+				Platform.runLater(() -> pJiraIndicator.setVisible(true));
+				try {
+					List<CalcTableData> calcTableDataList;
+					if (isJql) {
+						calcTableDataList = dataService.getCalcTableDataList(jqlText.trim());
+					} else {
+						calcTableDataList = List.of(dataService.getCalcTableData(jqlText.trim()));
+					}
+
+					filteredList = calcTableDataList.stream()
+							.filter(c -> tableData.stream().noneMatch(t -> c.getName().equals(t.getName())))
+							.collect(Collectors.toList());
+				} catch (IOException | InterruptedException e) {
+					LOGGER.log(Level.SEVERE, e.getMessage(), e);
+					Platform.runLater(() -> showErrorAlert(e));
+					throw e;
+				}
+				return null;
+			}
+
+			@Override
+			protected void done() {
+				Platform.runLater(() -> pJiraIndicator.setVisible(false));
+			}
+
+			@Override
+			protected void failed() {
+				if (!isJql) {
+					tableData.add(new CalcTableData(jqlText, 0d, 0d, 0d, true));
+				}
+			}
+
+			private void showErrorAlert(Throwable e) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("JIRA Service");
+				alert.setHeaderText("Error importing data");
+				alert.setContentText(String.format("Could not load data with '%s'", jqlText));
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				e.printStackTrace(pw);
+				String exceptionText = sw.toString();
+
+				Label label = new Label("The exception stacktrace was:");
+
+				TextArea textArea = new TextArea(exceptionText);
+				textArea.setEditable(false);
+				textArea.setWrapText(true);
+
+				textArea.setMaxWidth(Double.MAX_VALUE);
+				textArea.setMaxHeight(Double.MAX_VALUE);
+				GridPane.setVgrow(textArea, Priority.ALWAYS);
+				GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+				GridPane expContent = new GridPane();
+				expContent.setMaxWidth(Double.MAX_VALUE);
+				expContent.add(label, 0, 0);
+				expContent.add(textArea, 0, 1);
+
+				alert.getDialogPane().setExpandableContent(expContent);
+				alert.showAndWait();
+			}
+
+			@Override
+			protected void succeeded() {
+				Platform.runLater(() -> {
+					if (filteredList != null || !filteredList.isEmpty()) {
+						tableData.addAll(filteredList);
+					} else if (!isJql) {
+						tableData.add(new CalcTableData(jqlText, 0d, 0d, 0d, true));
+					}
+					bind();
+				});
+			}
+		};
+
 	}
 
 	/**
@@ -184,6 +311,15 @@ public class MainController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		tfName.setOnAction(e -> onActionAdd());
+		bClear.visibleProperty().bind(tfName.textProperty().isNotEmpty());
+		bClear.setOnAction(e -> Platform.runLater(() -> {
+			tfName.setText("");
+			tfName.requestFocus();
+		}));
+
+		bCopyAsList.setOnAction(e -> onActionCopyTableDataAsTextList());
+		bCopyAsMarkdown.setOnAction(e -> onActionCopyTableDataAsMarkdown());
+		bCopyAsTable.setOnAction(e -> onActionCopyTableData());
 
 		capaData.backendProperty().bind(Bindings.createDoubleBinding(() -> {
 			if (SccUtils.isNumeric(tfCapaBackend.textProperty().get())) {
@@ -209,44 +345,6 @@ public class MainController implements Initializable {
 		initSumTable();
 		bind();
 		Platform.runLater(() -> tfName.requestFocus());
-	}
-
-	/**
-	 * Adds the add icon to the name text-field. Cannot be done directly in FXML,
-	 * otherwise compilation errors will occur with the Graalvm compiler
-	 */
-	private void initTfNamePane() {
-		SVGPath svgIcon = SccViewUtils.addIcon();
-		SccViewUtils.setIconAnchorPositions(svgIcon, 8, 0, 10);
-
-		tfNamePane.getChildren().add(svgIcon);
-		SccViewUtils.initTextfieldPaneFocus(tfName, tfNamePane, "main-textfield", "main-textfield-focus");
-	}
-
-	/**
-	 * Adds the back-end icon to the name text-field. Cannot be done directly in
-	 * FXML, otherwise compilation errors will occur with the Graalvm compiler
-	 */
-	private void initTfBackendPane() {
-		SVGPath svgIcon = SccViewUtils.backendIcon();
-		SccViewUtils.setIconAnchorPositions(svgIcon, 6, 0, 8);
-
-		tfBackendPane.getChildren().add(svgIcon);
-		SccViewUtils.initTextfieldPaneFocus(tfCapaBackend, tfBackendPane, "sidebar-textfield",
-				"sidebar-textfield-focus");
-	}
-
-	/**
-	 * Adds the front-end icon to the name text-field. Cannot be done directly in
-	 * FXML, otherwise compilation errors will occur with the Graalvm compiler
-	 */
-	private void initTfFrontendPane() {
-		SVGPath svgIcon = SccViewUtils.frontendIcon();
-		SccViewUtils.setIconAnchorPositions(svgIcon, 5, 0, 8);
-
-		tfFrontendPane.getChildren().add(svgIcon);
-		SccViewUtils.initTextfieldPaneFocus(tfCapaFrontend, tfFrontendPane, "sidebar-textfield",
-				"sidebar-textfield-focus");
 	}
 
 	/**
@@ -315,6 +413,11 @@ public class MainController implements Initializable {
 		tableData = FXCollections.observableArrayList();
 		mainTable.setItems(tableData);
 		mainTable.setContextMenu(contextMenu);
+		mainTable.setOnKeyPressed(e -> {
+			if (!mainTable.getSelectionModel().isEmpty() && e.getCode().equals(KeyCode.DELETE)) {
+				onActionRemove();
+			}
+		});
 	}
 
 	/**
@@ -337,36 +440,47 @@ public class MainController implements Initializable {
 	}
 
 	/**
-	 * Adds an item to the table with the specified text
+	 * Initialize backend text-field
 	 */
-	private void onActionAdd() {
-		Platform.runLater(() -> {
-			tableData.add(new CalcTableData(tfName.getText(), 0d, 0d, 0d, true));
-			tfName.setText("");
-		});
-		bind();
+	private void initTfBackendPane() {
+		SccViewUtils.initTextfieldPaneFocus(tfCapaBackend, tfBackendPane, "sidebar-textfield",
+				"sidebar-textfield-focus");
 	}
 
 	/**
-	 * Removes the selected item
+	 * Initialize frontend text-field
 	 */
-	private void onActionRemove() {
+	private void initTfFrontendPane() {
+		SccViewUtils.initTextfieldPaneFocus(tfCapaFrontend, tfFrontendPane, "sidebar-textfield",
+				"sidebar-textfield-focus");
+	}
 
-		final String name;
-		if (mainTable.getSelectionModel().getSelectedItem().getName() != null
-				&& mainTable.getSelectionModel().getSelectedItem().getName().length() > 21) {
-			name = mainTable.getSelectionModel().getSelectedItem().getName().substring(0, 21);
-		} else {
-			name = mainTable.getSelectionModel().getSelectedItem().getName();
-		}
+	/**
+	 * Initialize name text-field
+	 */
+	private void initTfNamePane() {
+		SccViewUtils.initTextfieldPaneFocus(tfName, tfNamePane, "main-textfield", "main-textfield-focus");
+	}
 
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Remove Item");
-		alert.setHeaderText(String.format("Remove '%s'", name));
+	/**
+	 * Adds an item to the table with the specified text
+	 */
+	private void onActionAdd() {
+		String value = tfName.getText();
 
-		Optional<ButtonType> result = alert.showAndWait();
-		if (result.isPresent() && result.get() == ButtonType.OK) {
-			Platform.runLater(() -> tableData.remove(mainTable.getSelectionModel().getSelectedIndex()));
+		if (dataService.isEnabled() && value != null && value.startsWith("jql:")) {
+			String jql = value.substring(4).trim();
+			new Thread(buildJiraTask(jql)).start();
+			Platform.runLater(() -> tfName.setText(""));
+		} else if (dataService.isEnabled() && value != null && value.contains("-") && !value.trim().contains(" ")) {
+			new Thread(buildJiraTask(value.trim())).start();
+			Platform.runLater(() -> tfName.setText(""));
+		} else if (value != null && !"".equals(value)) {
+			Platform.runLater(() -> {
+				tableData.add(new CalcTableData(value, 0d, 0d, 0d, true));
+				tfName.setText("");
+				bind();
+			});
 		}
 	}
 
@@ -401,6 +515,35 @@ public class MainController implements Initializable {
 			content.putString(SccUtils.buildTableDataAsListText(tableData));
 			Clipboard.getSystemClipboard().setContent(content);
 		});
+	}
+
+	/**
+	 * Removes the selected item
+	 */
+	private void onActionRemove() {
+		final String name;
+		if (mainTable.getSelectionModel().getSelectedItem().getName() != null
+				&& mainTable.getSelectionModel().getSelectedItem().getName().length() > 21) {
+			name = mainTable.getSelectionModel().getSelectedItem().getName().substring(0, 21);
+		} else {
+			name = mainTable.getSelectionModel().getSelectedItem().getName();
+		}
+
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Remove Item");
+		alert.setHeaderText(String.format("Remove '%s'", name));
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.isPresent() && result.get() == ButtonType.OK) {
+			Platform.runLater(() -> tableData.remove(mainTable.getSelectionModel().getSelectedIndex()));
+		}
+	}
+
+	public void setDataService(DataService dataService) {
+		this.dataService = dataService;
+		if (dataService.isEnabled()) {
+			tfName.setPromptText("Add Item or Jira ID or jql: Query");
+		}
 	}
 
 	/**

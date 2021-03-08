@@ -76,10 +76,6 @@ public class CalcTableData {
 		return frontend;
 	}
 
-	public boolean isActive() {
-		return active.get();
-	}
-
 	public double getBackend() {
 		return backend.get();
 	}
@@ -94,6 +90,10 @@ public class CalcTableData {
 
 	public double getPersonDays() {
 		return personDays.get();
+	}
+
+	public boolean isActive() {
+		return active.get();
 	}
 
 	public StringProperty nameProperty() {
