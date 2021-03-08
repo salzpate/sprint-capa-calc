@@ -121,6 +121,14 @@ class SccUtilsTest {
 		assertEquals(null, SccUtils.trueOrFalseString(true, null, "false"));
 		assertEquals(null, SccUtils.trueOrFalseString(false, "true", null));
 		assertEquals(null, SccUtils.trueOrFalseString(true, null, null));
+	}
 
+	@Test
+	void testGetFontSizeFromStyle() {
+		assertEquals(11, SccUtils.getFontSizeFromStyle("-fx-font-size: 11"));
+		assertEquals(11, SccUtils.getFontSizeFromStyle("-fx-font-size: 11;"));
+		assertEquals(13, SccUtils.getFontSizeFromStyle("-fx-font-size 11"));
+		assertEquals(13, SccUtils.getFontSizeFromStyle(""));
+		assertEquals(13, SccUtils.getFontSizeFromStyle(null));
 	}
 }

@@ -43,7 +43,6 @@
   -fx-background-color: #e2dcdd;
 }
 
-
 .main-textfield {
   -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -10%), -fx-text-box-border), linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);
   -fx-background-insets: 0, 1;
@@ -90,7 +89,8 @@
 #main .table-view .column-header,
 #main .table-view .column-header .filler,
 #main .table-view .column-header-background .filler {
-    -fx-background-color: -fx-inner-border, #ffffff;
+  -fx-background-color: -fx-inner-border, #ffffff;
+  -fx-font-size: 13 !important;
 }
 
 #main .table-view .table-cell {

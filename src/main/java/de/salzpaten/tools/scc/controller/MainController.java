@@ -63,6 +63,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -398,6 +400,18 @@ public class MainController implements Initializable {
 		MenuItem removeItem = new MenuItem("Remove item");
 		removeItem.setOnAction(e -> onActionRemove());
 
+		MenuItem increaseFontSize = new MenuItem("Increase font size");
+		increaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
+		increaseFontSize.setOnAction(e -> onActionIncreaseFontSize());
+
+		MenuItem decreaseFontSize = new MenuItem("Decrease font size");
+		decreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN));
+		decreaseFontSize.setOnAction(e -> onActionDecreaseFontSize());
+
+		MenuItem defaultFontSize = new MenuItem("Default font size");
+		defaultFontSize.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
+		defaultFontSize.setOnAction(e -> onActionDefaultFontSize());
+
 		MenuItem textListItem = new MenuItem("Copy items as list");
 		textListItem.setOnAction(e -> onActionCopyTableDataAsTextList());
 
@@ -407,7 +421,7 @@ public class MainController implements Initializable {
 		MenuItem copyMarkdownItem = new MenuItem("Copy items as markdown");
 		copyMarkdownItem.setOnAction(e -> onActionCopyTableDataAsMarkdown());
 
-		ContextMenu contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), textListItem, copyItem,
+		ContextMenu contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize, defaultFontSize, decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem,
 				copyMarkdownItem);
 
 		tableData = FXCollections.observableArrayList();
@@ -418,6 +432,22 @@ public class MainController implements Initializable {
 				onActionRemove();
 			}
 		});
+	}
+
+	private void onActionDefaultFontSize() {
+		mainTable.setStyle("");
+	}
+
+	private void onActionIncreaseFontSize() {
+		int size = SccUtils.getFontSizeFromStyle(mainTable.getStyle()) + 2;
+		mainTable.setStyle("-fx-font-size: " + size);
+	}
+
+	private void onActionDecreaseFontSize() {
+		int size = SccUtils.getFontSizeFromStyle(mainTable.getStyle()) - 2;
+		if (size > 0) {
+			mainTable.setStyle("-fx-font-size: " + size);
+		}
 	}
 
 	/**
