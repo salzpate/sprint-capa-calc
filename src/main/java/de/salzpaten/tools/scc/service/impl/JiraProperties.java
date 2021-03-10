@@ -29,17 +29,17 @@ public class JiraProperties implements Serializable {
 
 	private static final String DEFAULT_VERSION = "latest";
 
+	private static final String REST_AGILE = "rest/agile/";
+
+	private static final String REST_API = "rest/api/";
+
 	private static final long serialVersionUID = 677357818442914548L;
 
 	private Integer agileBoard;
 
-	private String agileUrl;
-
 	private String agileVersion;
 
 	private String apiProject;
-
-	private String apiUrl;
 
 	private String apiVersion;
 
@@ -53,21 +53,20 @@ public class JiraProperties implements Serializable {
 
 	private String fieldPersonDays;
 
+	private String url;
+
 	public Integer getAgileBoard() {
 		return agileBoard;
 	}
 
-	public String getAgileUrl() {
-		return agileUrl;
-	}
-
 	public String getAgileUrlWithVersion() {
 		StringBuilder urlBuilder = new StringBuilder();
-		if (agileUrl != null && !"".equals(agileUrl.trim())) {
-			urlBuilder.append(agileUrl.trim());
-			if (!agileUrl.trim().endsWith("/")) {
+		if (url != null && !"".equals(url.trim())) {
+			urlBuilder.append(url.trim());
+			if (!url.trim().endsWith("/")) {
 				urlBuilder.append("/");
 			}
+			urlBuilder.append(REST_AGILE);
 			if (agileVersion == null || "".equals("")) {
 				urlBuilder.append(DEFAULT_VERSION).append("/");
 			} else {
@@ -85,17 +84,14 @@ public class JiraProperties implements Serializable {
 		return apiProject;
 	}
 
-	public String getApiUrl() {
-		return apiUrl;
-	}
-
 	public String getApiUrlWithVersion() {
 		StringBuilder urlBuilder = new StringBuilder();
-		if (apiUrl != null && !"".equals(apiUrl.trim())) {
-			urlBuilder.append(apiUrl.trim());
-			if (!apiUrl.trim().endsWith("/")) {
+		if (url != null && !"".equals(url.trim())) {
+			urlBuilder.append(url.trim());
+			if (!url.trim().endsWith("/")) {
 				urlBuilder.append("/");
 			}
+			urlBuilder.append(REST_API);
 			if (apiVersion == null || "".equals("")) {
 				urlBuilder.append(DEFAULT_VERSION).append("/");
 			} else {
@@ -135,6 +131,10 @@ public class JiraProperties implements Serializable {
 		return fieldPersonDays;
 	}
 
+	public String getUrl() {
+		return url;
+	}
+
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -143,20 +143,12 @@ public class JiraProperties implements Serializable {
 		this.agileBoard = agileBoard;
 	}
 
-	public void setAgileUrl(String agileUrl) {
-		this.agileUrl = agileUrl;
-	}
-
 	public void setAgileVersion(String agileVersion) {
 		this.agileVersion = agileVersion;
 	}
 
 	public void setApiProject(String apiProject) {
 		this.apiProject = apiProject;
-	}
-
-	public void setApiUrl(String apiUrl) {
-		this.apiUrl = apiUrl;
 	}
 
 	public void setApiVersion(String apiVersion) {
@@ -183,12 +175,16 @@ public class JiraProperties implements Serializable {
 		this.fieldPersonDays = fieldPersonDays;
 	}
 
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
 	@Override
 	public String toString() {
-		return "JiraProperties [agileBoard=" + agileBoard + ", agileUrl=" + agileUrl + ", agileVersion=" + agileVersion
-				+ ", apiProject=" + apiProject + ", apiUrl=" + apiUrl + ", apiVersion=" + apiVersion + ", authMethod="
-				+ authMethod + ", authToken=" + authToken + ", enabled=" + enabled + ", fieldName=" + fieldName
-				+ ", fieldPersonDays=" + fieldPersonDays + "]";
+		return "JiraProperties [agileBoard=" + agileBoard + ", agileVersion=" + agileVersion + ", apiProject="
+				+ apiProject + ", apiVersion=" + apiVersion + ", authMethod=" + authMethod + ", authToken=" + authToken
+				+ ", enabled=" + enabled + ", fieldName=" + fieldName + ", fieldPersonDays=" + fieldPersonDays
+				+ ", url=" + url + "]";
 	}
 
 }

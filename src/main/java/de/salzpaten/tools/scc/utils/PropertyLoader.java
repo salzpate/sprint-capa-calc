@@ -54,7 +54,7 @@ public class PropertyLoader {
 		try (InputStream inStream = new FileInputStream(new File(file))) {
 			prop.load(inStream);
 			jiraProperties = new JiraProperties();
-			jiraProperties.setApiUrl(prop.getProperty("jira.api.url"));
+			jiraProperties.setUrl(prop.getProperty("jira.url"));
 			jiraProperties.setApiVersion(prop.getProperty("jira.api.version"));
 			jiraProperties.setApiProject(prop.getProperty("jira.api.project", ""));
 			jiraProperties.setEnabled(Boolean.valueOf(prop.getProperty("jira.enabled")));
@@ -62,7 +62,6 @@ public class PropertyLoader {
 			jiraProperties.setAuthToken(prop.getProperty("jira.auth.token"));
 			jiraProperties.setFieldName(prop.getProperty("jira.field.name", "summary"));
 			jiraProperties.setFieldPersonDays(prop.getProperty("jira.field.personDays", ""));
-			jiraProperties.setAgileUrl(prop.getProperty("jira.agile.url"));
 			jiraProperties.setAgileVersion(prop.getProperty("jira.agile.version"));
 			String boardId = prop.getProperty("jira.agile.board", null);
 			if (boardId != null) {

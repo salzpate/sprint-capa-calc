@@ -169,8 +169,8 @@ public class JiraDataServiceImpl implements DataService {
 
 	@Override
 	public boolean isSprintEnabled() {
-		return jiraProperties.getAgileBoard() != null && jiraProperties.getAgileUrl() != null
-				&& !"".equals(jiraProperties.getAgileUrl());
+		return jiraProperties.isEnabled() && jiraProperties.getAgileBoard() != null
+				&& jiraProperties.getAgileBoard() > -1;
 	}
 
 	/**
