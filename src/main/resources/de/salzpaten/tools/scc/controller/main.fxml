@@ -62,6 +62,12 @@ limitations under the License.
                   <SVGPath content="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8zM5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" fill="#3a97fb" fillRule="EVEN_ODD" stroke="#3a97fb" strokeLineCap="ROUND" strokeLineJoin="ROUND" />
                </graphic>
             </Button>
+            <Label fx:id="lImport" layoutX="44.0" layoutY="44.0" styleClass="sidebar-headline" text="Import" visible="false" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="285.0" />
+            <Button fx:id="bSprintImport" alignment="BASELINE_LEFT" layoutX="24.0" layoutY="204.0" mnemonicParsing="false" styleClass="sidebar-button" text="Jira Sprints" visible="false" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="309.0">
+               <graphic>
+                  <SVGPath content="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414zM3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" fill="#3a97fb" fillRule="EVEN_ODD" stroke="#3a97fb" />
+               </graphic>
+            </Button>
          </children></AnchorPane>
    </left>
    <center>

@@ -30,7 +30,9 @@ import java.util.stream.Collectors;
 
 import de.salzpaten.tools.scc.domain.CalcTableData;
 import de.salzpaten.tools.scc.domain.CapaData;
+import de.salzpaten.tools.scc.domain.ComboBoxItem;
 import de.salzpaten.tools.scc.service.DataService;
+import de.salzpaten.tools.scc.table.PersonDaysCell;
 import de.salzpaten.tools.scc.table.SumDoubleCell;
 import de.salzpaten.tools.scc.table.SumStringCell;
 import de.salzpaten.tools.scc.utils.SccUtils;
@@ -44,12 +46,16 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
@@ -94,6 +100,9 @@ public class MainController implements Initializable {
 	@FXML
 	private Button bCopyAsTable;
 
+	@FXML
+	private Button bSprintImport;
+
 	private CapaData capaData = new CapaData(0d, 0d, 0d);
 
 	@FXML
@@ -110,6 +119,9 @@ public class MainController implements Initializable {
 	private CalcTableData freeCapaTableData = new CalcTableData("Free capacity", 0d, 0d, 0d, true);
 
 	@FXML
+	private Label lImport;
+
+	@FXML
 	private TableView<CalcTableData> mainTable;
 
 	@FXML
@@ -122,6 +134,13 @@ public class MainController implements Initializable {
 	private ObjectBinding<Double> plannedCapaPersonDaysBinding;
 
 	private CalcTableData plannedCapaTableData = new CalcTableData("Planned capacity", 0d, 0d, 0d, true);
+
+	@FXML
+	private ProgressIndicator pSprintIndicator;
+
+	private ComboBox<ComboBoxItem> sprintComboBox;
+
+	private Dialog<ComboBoxItem> sprintDialog;
 
 	@FXML
 	private TableView<CalcTableData> sumTable;
@@ -191,6 +210,46 @@ public class MainController implements Initializable {
 	}
 
 	/**
+	 * Generates a task that loads sprints from Jira
+	 *
+	 * @param jqlText jqlText
+	 * @return Task
+	 */
+	private Task<Void> buildJiraSprintTask() {
+		return new Task<Void>() {
+
+			private List<ComboBoxItem> sprintList;
+
+			@Override
+			protected Void call() throws Exception {
+				Platform.runLater(() -> pSprintIndicator.setVisible(true));
+				try {
+					sprintList = dataService.getOpenSprints();
+				} catch (IOException | InterruptedException e) {
+					LOGGER.log(Level.SEVERE, e.getMessage(), e);
+					Platform.runLater(() -> showErrorAlert(e, "Could not load sprints"));
+					throw e;
+				}
+				return null;
+			}
+
+			@Override
+			protected void done() {
+				Platform.runLater(() -> pSprintIndicator.setVisible(false));
+			}
+
+			@Override
+			protected void succeeded() {
+				Platform.runLater(() -> {
+					sprintComboBox.getItems().clear();
+					sprintComboBox.getItems().addAll(sprintList);
+					sprintComboBox.getSelectionModel().select(0);
+				});
+			}
+		};
+	}
+
+	/**
 	 * Generates a task that loads items from Jira using an ID or a JQL query
 	 *
 	 * @param jqlText jqlText
@@ -213,13 +272,12 @@ public class MainController implements Initializable {
 					} else {
 						calcTableDataList = List.of(dataService.getCalcTableData(jqlText.trim()));
 					}
-
 					filteredList = calcTableDataList.stream()
 							.filter(c -> tableData.stream().noneMatch(t -> c.getName().equals(t.getName())))
 							.collect(Collectors.toList());
 				} catch (IOException | InterruptedException e) {
 					LOGGER.log(Level.SEVERE, e.getMessage(), e);
-					Platform.runLater(() -> showErrorAlert(e));
+					Platform.runLater(() -> showErrorAlert(e, String.format("Could not load data with '%s'", jqlText)));
 					throw e;
 				}
 				return null;
@@ -237,36 +295,6 @@ public class MainController implements Initializable {
 				}
 			}
 
-			private void showErrorAlert(Throwable e) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("JIRA Service");
-				alert.setHeaderText("Error importing data");
-				alert.setContentText(String.format("Could not load data with '%s'", jqlText));
-				StringWriter sw = new StringWriter();
-				PrintWriter pw = new PrintWriter(sw);
-				e.printStackTrace(pw);
-				String exceptionText = sw.toString();
-
-				Label label = new Label("The exception stacktrace was:");
-
-				TextArea textArea = new TextArea(exceptionText);
-				textArea.setEditable(false);
-				textArea.setWrapText(true);
-
-				textArea.setMaxWidth(Double.MAX_VALUE);
-				textArea.setMaxHeight(Double.MAX_VALUE);
-				GridPane.setVgrow(textArea, Priority.ALWAYS);
-				GridPane.setHgrow(textArea, Priority.ALWAYS);
-
-				GridPane expContent = new GridPane();
-				expContent.setMaxWidth(Double.MAX_VALUE);
-				expContent.add(label, 0, 0);
-				expContent.add(textArea, 0, 1);
-
-				alert.getDialogPane().setExpandableContent(expContent);
-				alert.showAndWait();
-			}
-
 			@Override
 			protected void succeeded() {
 				Platform.runLater(() -> {
@@ -279,7 +307,6 @@ public class MainController implements Initializable {
 				});
 			}
 		};
-
 	}
 
 	/**
@@ -319,6 +346,8 @@ public class MainController implements Initializable {
 			tfName.requestFocus();
 		}));
 
+		bSprintImport.setOnAction(e -> onActionSprintImport());
+
 		bCopyAsList.setOnAction(e -> onActionCopyTableDataAsTextList());
 		bCopyAsMarkdown.setOnAction(e -> onActionCopyTableDataAsMarkdown());
 		bCopyAsTable.setOnAction(e -> onActionCopyTableData());
@@ -345,6 +374,7 @@ public class MainController implements Initializable {
 		initTfNamePane();
 		initMainTable();
 		initSumTable();
+		initSprintAlert();
 		bind();
 		Platform.runLater(() -> tfName.requestFocus());
 	}
@@ -365,10 +395,11 @@ public class MainController implements Initializable {
 		tcName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 		tcName.setCellFactory(TextFieldTableCell.forTableColumn());
 		tcPersonDays.setCellValueFactory(cellData -> cellData.getValue().personDaysProperty().asObject());
-		tcPersonDays.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringIfNumericConverter()));
+		tcPersonDays.setCellFactory(cell -> new PersonDaysCell());
 		tcPersonDays.setOnEditCommit(t -> {
 			t.getRowValue().setPersonDays(SccUtils.scaledDouble(t.getNewValue()));
 			bind();
+			mainTable.refresh();
 		});
 		tcFrontend.setCellValueFactory(cellData -> cellData.getValue().frontendProperty().asObject());
 		tcFrontend.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringIfNumericConverter()));
@@ -380,6 +411,7 @@ public class MainController implements Initializable {
 				rowValue.setBackend(SccUtils.subtractDouble(rowValue.getPersonDays(), newValue));
 			}
 			bind();
+			mainTable.refresh();
 		});
 		tcBackend.setCellValueFactory(cellData -> cellData.getValue().backendProperty().asObject());
 		tcBackend.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringIfNumericConverter()));
@@ -391,6 +423,7 @@ public class MainController implements Initializable {
 				rowValue.setFrontend(SccUtils.subtractDouble(rowValue.getPersonDays(), newValue));
 			}
 			bind();
+			mainTable.refresh();
 		});
 
 		MenuItem headItem = new MenuItem("Actions");
@@ -401,7 +434,7 @@ public class MainController implements Initializable {
 		removeItem.setOnAction(e -> onActionRemove());
 
 		MenuItem increaseFontSize = new MenuItem("Increase font size");
-		increaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
+		increaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.ADD, KeyCombination.SHORTCUT_DOWN));
 		increaseFontSize.setOnAction(e -> onActionIncreaseFontSize());
 
 		MenuItem decreaseFontSize = new MenuItem("Decrease font size");
@@ -421,8 +454,8 @@ public class MainController implements Initializable {
 		MenuItem copyMarkdownItem = new MenuItem("Copy items as markdown");
 		copyMarkdownItem.setOnAction(e -> onActionCopyTableDataAsMarkdown());
 
-		ContextMenu contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize, defaultFontSize, decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem,
-				copyMarkdownItem);
+		ContextMenu contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize,
+				defaultFontSize, decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem, copyMarkdownItem);
 
 		tableData = FXCollections.observableArrayList();
 		mainTable.setItems(tableData);
@@ -434,20 +467,53 @@ public class MainController implements Initializable {
 		});
 	}
 
-	private void onActionDefaultFontSize() {
-		mainTable.setStyle("");
-	}
+	private void initSprintAlert() {
+		sprintComboBox = new ComboBox<ComboBoxItem>(FXCollections.observableArrayList());
+		pSprintIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+		pSprintIndicator.setVisible(false);
+		pSprintIndicator.setMaxHeight(24d);
+		pSprintIndicator.setMaxWidth(24d);
 
-	private void onActionIncreaseFontSize() {
-		int size = SccUtils.getFontSizeFromStyle(mainTable.getStyle()) + 2;
-		mainTable.setStyle("-fx-font-size: " + size);
-	}
+		sprintDialog = new Dialog<>();
+		sprintDialog.setTitle("Import from JIRA");
+		sprintDialog.setHeaderText("Choose a Sprint");
 
-	private void onActionDecreaseFontSize() {
-		int size = SccUtils.getFontSizeFromStyle(mainTable.getStyle()) - 2;
-		if (size > 0) {
-			mainTable.setStyle("-fx-font-size: " + size);
-		}
+		ButtonType importButtonType = new ButtonType("Import", ButtonData.OK_DONE);
+		sprintDialog.getDialogPane().getButtonTypes().addAll(importButtonType, ButtonType.CANCEL);
+
+		Label label = new Label("Sprint:");
+
+		AnchorPane anchorPane = new AnchorPane();
+		AnchorPane.setTopAnchor(label, 0d);
+		AnchorPane.setLeftAnchor(label, 0d);
+		AnchorPane.setBottomAnchor(label, 0d);
+
+		AnchorPane.setTopAnchor(sprintComboBox, 0d);
+		AnchorPane.setLeftAnchor(sprintComboBox, 48.0);
+		AnchorPane.setRightAnchor(sprintComboBox, 38.0);
+		AnchorPane.setBottomAnchor(sprintComboBox, 0d);
+
+		AnchorPane.setTopAnchor(pSprintIndicator, 0d);
+		AnchorPane.setRightAnchor(pSprintIndicator, 0d);
+		AnchorPane.setBottomAnchor(pSprintIndicator, 0d);
+
+		anchorPane.getChildren().addAll(label, sprintComboBox, pSprintIndicator);
+		anchorPane.setPrefSize(620, 27);
+
+		Node okButton = sprintDialog.getDialogPane().lookupButton(importButtonType);
+		okButton.setDisable(true);
+		sprintComboBox.valueProperty()
+				.addListener((observable, oldValue, newValue) -> okButton.setDisable(newValue == null));
+
+		sprintDialog.getDialogPane().setContent(anchorPane);
+		Platform.runLater(() -> sprintComboBox.requestFocus());
+
+		sprintDialog.setResultConverter(dialogButton -> {
+			if (dialogButton == importButtonType) {
+				return sprintComboBox.getSelectionModel().getSelectedItem();
+			}
+			return null;
+		});
 	}
 
 	/**
@@ -547,6 +613,22 @@ public class MainController implements Initializable {
 		});
 	}
 
+	private void onActionDecreaseFontSize() {
+		int size = SccUtils.getFontSizeFromStyle(mainTable.getStyle()) - 2;
+		if (size > 0) {
+			mainTable.setStyle("-fx-font-size: " + size);
+		}
+	}
+
+	private void onActionDefaultFontSize() {
+		mainTable.setStyle("");
+	}
+
+	private void onActionIncreaseFontSize() {
+		int size = SccUtils.getFontSizeFromStyle(mainTable.getStyle()) + 2;
+		mainTable.setStyle("-fx-font-size: " + size);
+	}
+
 	/**
 	 * Removes the selected item
 	 */
@@ -569,11 +651,53 @@ public class MainController implements Initializable {
 		}
 	}
 
+	private void onActionSprintImport() {
+		new Thread(buildJiraSprintTask()).start();
+		Optional<ComboBoxItem> result = sprintDialog.showAndWait();
+		result.ifPresent(item -> {
+			new Thread(buildJiraTask(dataService.buildOpenTaskFromSprintJql(item.getKey()))).start();
+		});
+	}
+
 	public void setDataService(DataService dataService) {
 		this.dataService = dataService;
 		if (dataService.isEnabled()) {
 			tfName.setPromptText("Add Item or Jira ID or jql: Query");
 		}
+		if (dataService.isSprintEnabled()) {
+			lImport.setVisible(true);
+			bSprintImport.setVisible(true);
+		}
+	}
+
+	private void showErrorAlert(Throwable e, String contentText) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("JIRA Service");
+		alert.setHeaderText("Error importing data");
+		alert.setContentText(contentText);
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		String exceptionText = sw.toString();
+
+		Label label = new Label("The exception stacktrace was:");
+
+		TextArea textArea = new TextArea(exceptionText);
+		textArea.setEditable(false);
+		textArea.setWrapText(true);
+
+		textArea.setMaxWidth(Double.MAX_VALUE);
+		textArea.setMaxHeight(Double.MAX_VALUE);
+		GridPane.setVgrow(textArea, Priority.ALWAYS);
+		GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+		GridPane expContent = new GridPane();
+		expContent.setMaxWidth(Double.MAX_VALUE);
+		expContent.add(label, 0, 0);
+		expContent.add(textArea, 0, 1);
+
+		alert.getDialogPane().setExpandableContent(expContent);
+		alert.showAndWait();
 	}
 
 	/**

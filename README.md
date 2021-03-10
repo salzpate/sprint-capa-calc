@@ -21,15 +21,19 @@ The Jira extension can be activated via scc.properties. This will expand the Add
 
 *scc.properties*:
 
-| Name                  | Default | Desciption                                                      | Example                         |
-|-----------------------|---------|-----------------------------------------------------------------|---------------------------------|
-| jira.enabled          | false   | Enable Jira Extention                                           | true                            |
-| jira.api.url          |         | Url of Jira rest API                                            | http://localhost:8080/rest/api/ |
-| jira.api.version      | latest  | Version of Jira rest API                                        | 2                               |
-| jira.auth.method      |         | Authentifcation Method: Bearer or Basic                         | Basic                           |
-| jira.auth.token       |         | Authentifcation Token, by Basic use Base64 of username:password | dXNlcm5hbWU6cGFzc3dvcmQ=        |
-| jira.field.name       | summary | Name field of Jira rest response                                | summary                         |
-| jira.field.personDays |         | Name field of Jira rest response                                | customfield_10106               |
+| Name                  | Default | Desciption                                                      | Example                           |
+|-----------------------|---------|-----------------------------------------------------------------|-----------------------------------|
+| jira.enabled          | false   | Enable Jira Extention                                           | true                              |
+| jira.agile.board      |         | Board ID for loading active and future sprints                  | 39                                |
+| jira.agile.url        |         | Url of Jira rest agile API                                      | http://localhost:8080/rest/agile/ |
+| jira.agile.version    | latest  | Version of Jira rest agile API                                  | 1                                 |
+| jira.api.project      |         | Default Project Name for loading open items of selected sprint  | DH                                |
+| jira.api.url          |         | Url of Jira rest API                                            | http://localhost:8080/rest/api/   |
+| jira.api.version      | latest  | Version of Jira rest API                                        | 2                                 |
+| jira.auth.method      |         | Authentifcation Method: Bearer or Basic                         | Basic                             |
+| jira.auth.token       |         | Authentifcation Token, by Basic use Base64 of username:password | dXNlcm5hbWU6cGFzc3dvcmQ=          |
+| jira.field.name       | summary | Name field of Jira rest response                                | summary                           |
+| jira.field.personDays |         | Name field of Jira rest response                                | customfield_10106                 |
 
 
 ## Installtion

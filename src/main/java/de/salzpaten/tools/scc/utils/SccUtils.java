@@ -111,6 +111,26 @@ public final class SccUtils {
 	}
 
 	/**
+	 * Get font size From Style
+	 *
+	 * @param style Style
+	 * @return font size
+	 */
+	public static int getFontSizeFromStyle(String style) {
+		if (style != null && !"".equals(style.trim())) {
+			int beginIndex = style.lastIndexOf(':');
+			if (beginIndex > -1) {
+				try {
+					return Integer.parseInt(style.substring(beginIndex + 1).replace(";", "").trim());
+				} catch (NumberFormatException e) {
+					return DEFAULT_FONT_SIZE;
+				}
+			}
+		}
+		return DEFAULT_FONT_SIZE;
+	}
+
+	/**
 	 * Is value numeric
 	 *
 	 * @param strNum value
@@ -177,25 +197,5 @@ public final class SccUtils {
 
 	private SccUtils() {
 		super();
-	}
-
-	/**
-	 * Get font size From Style
-	 *
-	 * @param style Style
-	 * @return font size
-	 */
-	public static int getFontSizeFromStyle(String style) {
-		if (style != null && !"".equals(style.trim())) {
-			int beginIndex = style.lastIndexOf(':');
-			if (beginIndex > -1) {
-				try {
-					return Integer.parseInt(style.substring(beginIndex + 1).replace(";", "").trim());
-				} catch (NumberFormatException e) {
-					return DEFAULT_FONT_SIZE;
-				}
-			}
-		}
-		return DEFAULT_FONT_SIZE;
 	}
 }
