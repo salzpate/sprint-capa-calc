@@ -62,7 +62,7 @@ public class SccApp extends Application {
 			String userDir = System.getProperty("user.dir");
 			PropertyLoader propertyLoader = new PropertyLoader(userDir + File.separator + "scc.properties");
 			MainController controller = loader.getController();
-			controller.setDataService(new JiraDataServiceImpl(propertyLoader.getJiraProperties()));
+			controller.setDataService(new JiraDataServiceImpl(propertyLoader.getJiraProperties(), getHostServices()));
 
 			Scene scene = new Scene(root, 800, 600);
 			scene.getStylesheets().add("app.css");

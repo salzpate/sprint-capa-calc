@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,6 +36,9 @@ import com.google.gson.JsonParser;
 import de.salzpaten.tools.scc.domain.CalcTableData;
 import de.salzpaten.tools.scc.domain.ComboBoxItem;
 import de.salzpaten.tools.scc.service.DataService;
+import javafx.application.HostServices;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 /**
  *
@@ -45,12 +49,20 @@ import de.salzpaten.tools.scc.service.DataService;
  */
 public class JiraDataServiceImpl implements DataService {
 
+	/**
+	 * Standard Logger for GraalVM
+	 */
+	private static final Logger LOGGER = Logger.getLogger(JiraDataServiceImpl.class.getName());
+
 	private static final String OPEN_ISSUES_FROM_SPRINT_JQL = "Project=%s AND sprint=%s AND resolution = Unresolved AND issuetype not in subTaskIssueTypes()";
+
+	private HostServices hostServices;
 
 	private JiraProperties jiraProperties;
 
-	public JiraDataServiceImpl(JiraProperties jiraProperties) {
+	public JiraDataServiceImpl(JiraProperties jiraProperties, HostServices hostServices) {
 		this.jiraProperties = jiraProperties;
+		this.hostServices = hostServices;
 	}
 
 	/**
@@ -63,6 +75,22 @@ public class JiraDataServiceImpl implements DataService {
 		return HttpRequest.newBuilder().uri(URI.create(jiraProperties.getAgileUrlWithVersion() + uri))
 				.timeout(Duration.ofMinutes(1)).header("Content-Type", "application/json")
 				.setHeader("Authorization", jiraProperties.getAuthorizationHeader()).GET().build();
+	}
+
+	/**
+	 * Builds the field parameter
+	 *
+	 * @return field parameter
+	 */
+	private String buildFieldParameter() {
+		StringBuilder fieldsBuilder = new StringBuilder("fields=");
+		fieldsBuilder.append(jiraProperties.getFieldKey()).append(",");
+		fieldsBuilder.append(jiraProperties.getFieldName()).append(",");
+		fieldsBuilder.append("issuetype,priority");
+		if (jiraProperties.getFieldPersonDays() != null && !"".equals(jiraProperties.getFieldPersonDays().trim())) {
+			fieldsBuilder.append(",").append(jiraProperties.getFieldName());
+		}
+		return fieldsBuilder.toString();
 	}
 
 	/**
@@ -84,25 +112,16 @@ public class JiraDataServiceImpl implements DataService {
 
 	@Override
 	public CalcTableData getCalcTableData(String id) throws IOException, InterruptedException {
-		CalcTableData calcTableData = new CalcTableData();
-		calcTableData.setActive(true);
-		final String issueUri;
-		if (jiraProperties.getFieldPersonDays() == null || "".equals(jiraProperties.getFieldPersonDays().trim())) {
-			issueUri = String.format("issue/%s?fields=%s", id, jiraProperties.getFieldName());
-		} else {
-			issueUri = String.format("issue/%s?fields=%s,%s", id, jiraProperties.getFieldName(),
-					jiraProperties.getFieldPersonDays());
-		}
+		CalcTableData calcTableData;
+		final String issueUri = String.format("issue/%s?%s", URLEncoder.encode(id, StandardCharsets.UTF_8),
+				buildFieldParameter());
 		HttpResponse<String> response = send(buildHttpRequest(issueUri));
 		if (response.statusCode() == 200) {
 			JsonElement root = JsonParser.parseString(response.body());
-			JsonObject fields = root.getAsJsonObject().get("fields").getAsJsonObject();
-			calcTableData.setName(fields.get(jiraProperties.getFieldName()).getAsString());
-			if (jiraProperties.getFieldPersonDays() != null && !"".equals(jiraProperties.getFieldPersonDays().trim())
-					&& fields.get(jiraProperties.getFieldPersonDays()) != null) {
-				calcTableData.setPersonDays(fields.get(jiraProperties.getFieldPersonDays()).getAsDouble());
-			}
+			calcTableData = mapCalcTableData(root);
 		} else {
+			calcTableData = new CalcTableData();
+			calcTableData.setActive(true);
 			calcTableData.setName(id);
 		}
 		return calcTableData;
@@ -111,31 +130,16 @@ public class JiraDataServiceImpl implements DataService {
 	@Override
 	public List<CalcTableData> getCalcTableDataList(String value) throws IOException, InterruptedException {
 		List<CalcTableData> dataList = new ArrayList<>();
-		final String issueUri;
-		if (jiraProperties.getFieldPersonDays() == null || "".equals(jiraProperties.getFieldPersonDays().trim())) {
-			issueUri = String.format("search/?jql=%s&fields=%s", URLEncoder.encode(value, StandardCharsets.UTF_8),
-					jiraProperties.getFieldName());
-		} else {
-			issueUri = String.format("search/?jql=%s&fields=%s,%s", URLEncoder.encode(value, StandardCharsets.UTF_8),
-					jiraProperties.getFieldName(), jiraProperties.getFieldPersonDays());
-		}
+		final String issueUri = String.format("search/?jql=%s&%s", URLEncoder.encode(value, StandardCharsets.UTF_8),
+				buildFieldParameter());
+
 		HttpResponse<String> response = send(buildHttpRequest(issueUri));
 		if (response.statusCode() == 200) {
 			JsonElement root = JsonParser.parseString(response.body());
 			JsonArray issues = root.getAsJsonObject().get("issues").getAsJsonArray();
 			try {
 				for (JsonElement item : issues) {
-					CalcTableData calcTableData = new CalcTableData();
-					calcTableData.setActive(true);
-					JsonObject fields = item.getAsJsonObject().get("fields").getAsJsonObject();
-					calcTableData.setName(fields.get(jiraProperties.getFieldName()).getAsString());
-					if (jiraProperties.getFieldPersonDays() != null
-							&& !"".equals(jiraProperties.getFieldPersonDays().trim())
-							&& fields.get(jiraProperties.getFieldPersonDays()) != null
-							&& !fields.get(jiraProperties.getFieldPersonDays()).isJsonNull()) {
-						calcTableData.setPersonDays(fields.get(jiraProperties.getFieldPersonDays()).getAsDouble());
-					}
-					dataList.add(calcTableData);
+					dataList.add(mapCalcTableData(item));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -174,6 +178,39 @@ public class JiraDataServiceImpl implements DataService {
 	}
 
 	/**
+	 * Maps the {@link JsonElement} to the {@link CalcTableData}
+	 *
+	 * @param jsonElement {@link JsonElement}
+	 * @return {@link CalcTableData}
+	 */
+	private CalcTableData mapCalcTableData(JsonElement jsonElement) {
+		CalcTableData calcTableData = new CalcTableData();
+		calcTableData.setActive(true);
+		calcTableData.setKey(jsonElement.getAsJsonObject().get("key").getAsString());
+
+		JsonObject fields = jsonElement.getAsJsonObject().get("fields").getAsJsonObject();
+		calcTableData.setName(fields.get(jiraProperties.getFieldName()).getAsString());
+		if (jiraProperties.getFieldPersonDays() != null && !"".equals(jiraProperties.getFieldPersonDays().trim())
+				&& fields.get(jiraProperties.getFieldPersonDays()) != null
+				&& !fields.get(jiraProperties.getFieldPersonDays()).isJsonNull()) {
+			calcTableData.setPersonDays(fields.get(jiraProperties.getFieldPersonDays()).getAsDouble());
+		}
+		if (!fields.getAsJsonObject().get("issuetype").isJsonNull()) {
+			JsonObject issuetype = fields.getAsJsonObject().get("issuetype").getAsJsonObject();
+			if (!issuetype.get("name").isJsonNull()) {
+				calcTableData.setIssuetypeName(issuetype.get("name").getAsString());
+			}
+		}
+		if (!fields.getAsJsonObject().get("priority").isJsonNull()) {
+			JsonObject priority = fields.getAsJsonObject().get("priority").getAsJsonObject();
+			if (!priority.get("name").isJsonNull()) {
+				calcTableData.setPriorityName(priority.get("name").getAsString());
+			}
+		}
+		return calcTableData;
+	}
+
+	/**
 	 * Send the HttpRequest and get a HttpResponse
 	 *
 	 * @param request {@link HttpRequest}
@@ -183,6 +220,31 @@ public class JiraDataServiceImpl implements DataService {
 	 */
 	private HttpResponse<String> send(HttpRequest request) throws IOException, InterruptedException {
 		return HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
+	}
+
+	@Override
+	public void openIdInBrowser(String id) {
+		if (hostServices == null) {
+			LOGGER.warning("No host services available");
+		} else if (jiraProperties.getUrl() == null || "".equals(jiraProperties.getUrl())) {
+			LOGGER.warning("Jira url is empty");
+		} else if (id == null || "".equals(id)) {
+			LOGGER.warning("ID is empty");
+		} else {
+			StringBuilder urlBuilder = new StringBuilder();
+			urlBuilder.append(jiraProperties.getUrl().trim());
+			if (!jiraProperties.getUrl().trim().endsWith("/")) {
+				urlBuilder.append("/");
+			}
+			urlBuilder.append("browse/").append(id);
+
+			final ClipboardContent content = new ClipboardContent();
+			content.putString(urlBuilder.toString());
+			Clipboard.getSystemClipboard().setContent(content);
+
+			hostServices.showDocument(urlBuilder.toString());
+		}
+
 	}
 
 }

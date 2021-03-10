@@ -25,6 +25,8 @@ import java.io.Serializable;
  */
 public class JiraProperties implements Serializable {
 
+	private static final String DEFAULT_KEY = "key";
+
 	private static final String DEFAULT_NAME = "summary";
 
 	private static final String DEFAULT_VERSION = "latest";
@@ -48,6 +50,8 @@ public class JiraProperties implements Serializable {
 	private String authToken;
 
 	private boolean enabled;
+
+	private String fieldKey;
 
 	private String fieldName;
 
@@ -117,6 +121,16 @@ public class JiraProperties implements Serializable {
 		return authToken;
 	}
 
+	public String getFieldKey() {
+		final String key;
+		if (fieldName == null || "".equals(fieldKey)) {
+			key = DEFAULT_KEY;
+		} else {
+			key = fieldKey;
+		}
+		return key;
+	}
+
 	public String getFieldName() {
 		final String name;
 		if (fieldName == null || "".equals(fieldName)) {
@@ -165,6 +179,10 @@ public class JiraProperties implements Serializable {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public void setFieldKey(String fieldKey) {
+		this.fieldKey = fieldKey;
 	}
 
 	public void setFieldName(String fieldName) {

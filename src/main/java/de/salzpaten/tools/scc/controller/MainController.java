@@ -33,8 +33,10 @@ import de.salzpaten.tools.scc.domain.CapaData;
 import de.salzpaten.tools.scc.domain.ComboBoxItem;
 import de.salzpaten.tools.scc.service.DataService;
 import de.salzpaten.tools.scc.table.PersonDaysCell;
+import de.salzpaten.tools.scc.table.PrioSvgImageCell;
 import de.salzpaten.tools.scc.table.SumDoubleCell;
 import de.salzpaten.tools.scc.table.SumStringCell;
+import de.salzpaten.tools.scc.table.TypeSvgImageCell;
 import de.salzpaten.tools.scc.utils.SccUtils;
 import de.salzpaten.tools.scc.utils.SccViewUtils;
 import de.salzpaten.tools.scc.utils.converter.DoubleStringIfNumericConverter;
@@ -108,6 +110,8 @@ public class MainController implements Initializable {
 	@FXML
 	private CheckBox cbCalc;
 
+	private ContextMenu contextMenu;
+
 	private DataService dataService;
 
 	private ObjectBinding<Double> freeCapaBackendBinding;
@@ -175,6 +179,15 @@ public class MainController implements Initializable {
 	private TableColumn<CalcTableData, Double> tcSumPersonDays;
 
 	@FXML
+	private TableColumn<CalcTableData, String> tcKey;
+
+	@FXML
+	private TableColumn<CalcTableData, String> tcType;
+
+	@FXML
+	private TableColumn<CalcTableData, String> tcPrio;
+
+	@FXML
 	private AnchorPane tfBackendPane;
 
 	@FXML
@@ -191,6 +204,8 @@ public class MainController implements Initializable {
 
 	@FXML
 	private AnchorPane tfNamePane;
+
+	private MenuItem openInBrowser;
 
 	/**
 	 * Bind all table fields
@@ -392,8 +407,14 @@ public class MainController implements Initializable {
 			t.getRowValue().setActive(t.getNewValue());
 			bind();
 		});
+		tcType.setCellValueFactory(cellData -> cellData.getValue().issuetypeNameProperty());
+		tcType.setCellFactory(cell -> new TypeSvgImageCell());
+		tcKey.setCellValueFactory(cellData -> cellData.getValue().keyProperty());
+		tcKey.setCellFactory(TextFieldTableCell.forTableColumn());
 		tcName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 		tcName.setCellFactory(TextFieldTableCell.forTableColumn());
+		tcPrio.setCellValueFactory(cellData -> cellData.getValue().priorityNameProperty());
+		tcPrio.setCellFactory(cell -> new PrioSvgImageCell());
 		tcPersonDays.setCellValueFactory(cellData -> cellData.getValue().personDaysProperty().asObject());
 		tcPersonDays.setCellFactory(cell -> new PersonDaysCell());
 		tcPersonDays.setOnEditCommit(t -> {
@@ -454,7 +475,7 @@ public class MainController implements Initializable {
 		MenuItem copyMarkdownItem = new MenuItem("Copy items as markdown");
 		copyMarkdownItem.setOnAction(e -> onActionCopyTableDataAsMarkdown());
 
-		ContextMenu contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize,
+		contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize,
 				defaultFontSize, decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem, copyMarkdownItem);
 
 		tableData = FXCollections.observableArrayList();
@@ -466,6 +487,7 @@ public class MainController implements Initializable {
 			}
 		});
 	}
+
 
 	private void initSprintAlert() {
 		sprintComboBox = new ComboBox<ComboBoxItem>(FXCollections.observableArrayList());
@@ -629,6 +651,13 @@ public class MainController implements Initializable {
 		mainTable.setStyle("-fx-font-size: " + size);
 	}
 
+	private void onActionOpenInBrowser() {
+		if (mainTable.getSelectionModel().getSelectedItem() != null) {
+			CalcTableData data = mainTable.getSelectionModel().getSelectedItem();
+			dataService.openIdInBrowser(data.getKey());
+		}
+	}
+
 	/**
 	 * Removes the selected item
 	 */
@@ -667,6 +696,14 @@ public class MainController implements Initializable {
 		if (dataService.isSprintEnabled()) {
 			lImport.setVisible(true);
 			bSprintImport.setVisible(true);
+			tcKey.setVisible(true);
+			tcType.setVisible(true);
+			tcPrio.setVisible(true);
+
+			openInBrowser = new MenuItem("Open in Browser");
+			openInBrowser.setOnAction(e -> onActionOpenInBrowser());
+			contextMenu.getItems().add(1, new SeparatorMenuItem());
+			contextMenu.getItems().add(1, openInBrowser);
 		}
 	}
 

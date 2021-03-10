@@ -30,10 +30,13 @@ import javafx.beans.property.StringProperty;
  */
 public class CalcTableData {
 
+	/**
+	 * Is active
+	 */
 	private BooleanProperty active = new SimpleBooleanProperty(true);
 
 	/**
-	 * person days of back-end members
+	 * Person days of back-end members
 	 */
 	private DoubleProperty backend = new SimpleDoubleProperty(0);
 
@@ -43,7 +46,17 @@ public class CalcTableData {
 	private DoubleProperty frontend = new SimpleDoubleProperty(0);
 
 	/**
-	 * Name of task
+	 * Name of issue type
+	 */
+	private StringProperty issuetypeName = new SimpleStringProperty("");
+
+	/**
+	 * Key of issue
+	 */
+	private StringProperty key = new SimpleStringProperty("");
+
+	/**
+	 * Name of issue
 	 */
 	private StringProperty name = new SimpleStringProperty("");
 
@@ -51,6 +64,11 @@ public class CalcTableData {
 	 * Needed person days
 	 */
 	private DoubleProperty personDays = new SimpleDoubleProperty(0);
+
+	/**
+	 * Name of priority
+	 */
+	private StringProperty priorityName = new SimpleStringProperty("");
 
 	public CalcTableData() {
 		super();
@@ -84,6 +102,14 @@ public class CalcTableData {
 		return frontend.get();
 	}
 
+	public String getIssuetypeName() {
+		return issuetypeName.get();
+	}
+
+	public String getKey() {
+		return key.get();
+	}
+
 	public String getName() {
 		return name.get();
 	}
@@ -92,8 +118,20 @@ public class CalcTableData {
 		return personDays.get();
 	}
 
+	public String getPriorityName() {
+		return priorityName.get();
+	}
+
 	public boolean isActive() {
 		return active.get();
+	}
+
+	public StringProperty issuetypeNameProperty() {
+		return issuetypeName;
+	}
+
+	public StringProperty keyProperty() {
+		return key;
 	}
 
 	public StringProperty nameProperty() {
@@ -116,12 +154,35 @@ public class CalcTableData {
 		this.frontend.set(frontend);
 	}
 
+	public void setIssuetypeName(String issuetypeName) {
+		this.issuetypeName.set(issuetypeName);
+	}
+
+	public void setKey(String key) {
+		this.key.set(key);
+	}
+
 	public void setName(String name) {
 		this.name.set(name);
 	}
 
 	public void setPersonDays(double personDays) {
 		this.personDays.set(personDays);
+	}
+
+	public void setPriorityName(String priorityName) {
+		this.priorityName.set(priorityName);
+	}
+
+	public StringProperty priorityNameProperty() {
+		return priorityName;
+	}
+
+	@Override
+	public String toString() {
+		return "CalcTableData [active=" + active.get() + ", backend=" + backend.get() + ", frontend=" + frontend.get()
+				+ ", issuetypeName=" + issuetypeName.get() + ", key=" + key.get() + ", name=" + name.get()
+				+ ", personDays=" + personDays.get() + ", priorityName=" + priorityName.get() + "]";
 	}
 
 }

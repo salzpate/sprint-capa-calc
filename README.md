@@ -32,6 +32,7 @@ The Jira extension can be activated via scc.properties. This will expand the Add
 | jira.auth.method      |         | Authentifcation Method: Bearer or Basic                         | Basic                             |
 | jira.auth.token       |         | Authentifcation Token, by Basic use Base64 of username:password | dXNlcm5hbWU6cGFzc3dvcmQ=          |
 | jira.field.name       | summary | Name field of Jira rest response                                | summary                           |
+| jira.field.key        | key     | Key field of Jira rest response                                 | key                               |
 | jira.field.personDays |         | Name field of Jira rest response                                | customfield_10106                 |
 
 

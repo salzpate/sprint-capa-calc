@@ -48,7 +48,7 @@ public final class SccUtils {
 	 */
 	public static String buildTableDataAsListText(List<CalcTableData> list) {
 		return Optional.ofNullable(list).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
-				.map(d -> String.format("* %s (%.1f|%.1f|%.1f) PD %s", emptyStringIfNull(d.getName()),
+				.map(d -> String.format("* %s %s (%.1f|%.1f|%.1f) PD %s", emptyStringIfNull(d.getKey()), emptyStringIfNull(d.getName()),
 						d.getPersonDays(), d.getBackend(), d.getFrontend(),
 						trueOrFalseString(d.isActive(), "", "not active")))
 				.collect(Collectors.joining("\n"));
@@ -67,7 +67,7 @@ public final class SccUtils {
 		strBuilder.append(
 				Optional.ofNullable(list).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull).map(d -> {
 					if (d.isActive()) {
-						return String.format("| %s | %.1f | %.1f | %.1f |", emptyStringIfNull(d.getName()),
+						return String.format("| %s | %.1f | %.1f | %.1f |", emptyStringIfNull(d.getKey()) + " " + emptyStringIfNull(d.getName()),
 								d.getPersonDays(), d.getBackend(), d.getFrontend());
 					} else {
 						return String.format("| ~~%s~~ | ~~%.1f~~ | ~~%.1f~~ | ~~%.1f~~ |",
@@ -89,7 +89,7 @@ public final class SccUtils {
 		strBuilder.append("---------------------------------------------------------------------\n");
 		strBuilder.append(Optional.ofNullable(list).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
 				.map(d -> String.format("%s %-50s %4.1f %4.1f %4.1f", trueOrFalseString(d.isActive(), "[x]", "[ ]"),
-						emptyStringIfNull(d.getName()), d.getPersonDays(), d.getBackend(), d.getFrontend()))
+						emptyStringIfNull(d.getKey()) + " " + emptyStringIfNull(d.getName()), d.getPersonDays(), d.getBackend(), d.getFrontend()))
 				.collect(Collectors.joining("\n")));
 		return strBuilder.toString();
 	}

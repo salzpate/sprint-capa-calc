@@ -80,4 +80,11 @@ public interface DataService {
 	 */
 	boolean isSprintEnabled();
 
+	/**
+	 * Open the ID in Browser
+	 *
+	 * @param id ID
+	 */
+	void openIdInBrowser(String id);
+
 }
