@@ -142,6 +142,10 @@ public class CalcTableData {
 		return personDays;
 	}
 
+	public StringProperty priorityNameProperty() {
+		return priorityName;
+	}
+
 	public void setActive(boolean active) {
 		this.active.set(active);
 	}
@@ -172,10 +176,6 @@ public class CalcTableData {
 
 	public void setPriorityName(String priorityName) {
 		this.priorityName.set(priorityName);
-	}
-
-	public StringProperty priorityNameProperty() {
-		return priorityName;
 	}
 
 	@Override

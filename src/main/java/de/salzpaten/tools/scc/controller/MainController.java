@@ -110,6 +110,12 @@ public class MainController implements Initializable {
 	@FXML
 	private CheckBox cbCalc;
 
+	private KeyCombination commandMinus = new KeyCodeCombination(KeyCode.SLASH, KeyCombination.SHORTCUT_DOWN);
+
+	private KeyCombination commandPlus = new KeyCodeCombination(KeyCode.CLOSE_BRACKET, KeyCombination.SHORTCUT_DOWN);
+
+	private KeyCombination commandZero = new KeyCodeCombination(KeyCode.NUMPAD0, KeyCombination.SHORTCUT_DOWN);
+
 	private ContextMenu contextMenu;
 
 	private DataService dataService;
@@ -127,6 +133,8 @@ public class MainController implements Initializable {
 
 	@FXML
 	private TableView<CalcTableData> mainTable;
+
+	private MenuItem openInBrowser;
 
 	@FXML
 	private ProgressIndicator pJiraIndicator;
@@ -161,10 +169,16 @@ public class MainController implements Initializable {
 	private TableColumn<CalcTableData, Double> tcFrontend;
 
 	@FXML
+	private TableColumn<CalcTableData, String> tcKey;
+
+	@FXML
 	private TableColumn<CalcTableData, String> tcName;
 
 	@FXML
 	private TableColumn<CalcTableData, Double> tcPersonDays;
+
+	@FXML
+	private TableColumn<CalcTableData, String> tcPrio;
 
 	@FXML
 	private TableColumn<CalcTableData, Double> tcSumBackend;
@@ -179,13 +193,7 @@ public class MainController implements Initializable {
 	private TableColumn<CalcTableData, Double> tcSumPersonDays;
 
 	@FXML
-	private TableColumn<CalcTableData, String> tcKey;
-
-	@FXML
 	private TableColumn<CalcTableData, String> tcType;
-
-	@FXML
-	private TableColumn<CalcTableData, String> tcPrio;
 
 	@FXML
 	private AnchorPane tfBackendPane;
@@ -204,8 +212,6 @@ public class MainController implements Initializable {
 
 	@FXML
 	private AnchorPane tfNamePane;
-
-	private MenuItem openInBrowser;
 
 	/**
 	 * Bind all table fields
@@ -475,8 +481,8 @@ public class MainController implements Initializable {
 		MenuItem copyMarkdownItem = new MenuItem("Copy items as markdown");
 		copyMarkdownItem.setOnAction(e -> onActionCopyTableDataAsMarkdown());
 
-		contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize,
-				defaultFontSize, decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem, copyMarkdownItem);
+		contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize, defaultFontSize,
+				decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem, copyMarkdownItem);
 
 		tableData = FXCollections.observableArrayList();
 		mainTable.setItems(tableData);
@@ -485,9 +491,17 @@ public class MainController implements Initializable {
 			if (!mainTable.getSelectionModel().isEmpty() && e.getCode().equals(KeyCode.DELETE)) {
 				onActionRemove();
 			}
+			if (commandPlus.match(e)) {
+				onActionIncreaseFontSize();
+			}
+			if (commandMinus.match(e)) {
+				onActionDecreaseFontSize();
+			}
+			if (commandZero.match(e)) {
+				onActionDefaultFontSize();
+			}
 		});
 	}
-
 
 	private void initSprintAlert() {
 		sprintComboBox = new ComboBox<ComboBoxItem>(FXCollections.observableArrayList());
