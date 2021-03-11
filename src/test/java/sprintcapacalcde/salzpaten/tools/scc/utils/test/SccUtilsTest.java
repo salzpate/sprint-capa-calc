@@ -88,6 +88,22 @@ class SccUtilsTest {
 	}
 
 	@Test
+	void testEmptyStringIfNullOrWithSpace() {
+		assertEquals("test ", SccUtils.emptyStringIfNullOrWithSpace("test"));
+		assertEquals("", SccUtils.emptyStringIfNull(null));
+		assertEquals("", SccUtils.emptyStringIfNull(""));
+	}
+
+	@Test
+	void testGetFontSizeFromStyle() {
+		assertEquals(11, SccUtils.getFontSizeFromStyle("-fx-font-size: 11"));
+		assertEquals(11, SccUtils.getFontSizeFromStyle("-fx-font-size: 11;"));
+		assertEquals(13, SccUtils.getFontSizeFromStyle("-fx-font-size 11"));
+		assertEquals(13, SccUtils.getFontSizeFromStyle(""));
+		assertEquals(13, SccUtils.getFontSizeFromStyle(null));
+	}
+
+	@Test
 	void testIsNumeric() {
 		assertTrue(SccUtils.isNumeric("100"));
 		assertTrue(SccUtils.isNumeric("10.0"));
@@ -121,14 +137,5 @@ class SccUtilsTest {
 		assertEquals(null, SccUtils.trueOrFalseString(true, null, "false"));
 		assertEquals(null, SccUtils.trueOrFalseString(false, "true", null));
 		assertEquals(null, SccUtils.trueOrFalseString(true, null, null));
-	}
-
-	@Test
-	void testGetFontSizeFromStyle() {
-		assertEquals(11, SccUtils.getFontSizeFromStyle("-fx-font-size: 11"));
-		assertEquals(11, SccUtils.getFontSizeFromStyle("-fx-font-size: 11;"));
-		assertEquals(13, SccUtils.getFontSizeFromStyle("-fx-font-size 11"));
-		assertEquals(13, SccUtils.getFontSizeFromStyle(""));
-		assertEquals(13, SccUtils.getFontSizeFromStyle(null));
 	}
 }

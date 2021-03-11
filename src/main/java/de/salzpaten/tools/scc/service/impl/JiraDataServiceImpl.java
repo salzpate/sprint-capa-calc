@@ -210,18 +210,6 @@ public class JiraDataServiceImpl implements DataService {
 		return calcTableData;
 	}
 
-	/**
-	 * Send the HttpRequest and get a HttpResponse
-	 *
-	 * @param request {@link HttpRequest}
-	 * @return {@link HttpResponse}
-	 * @throws IOException          IOException
-	 * @throws InterruptedException InterruptedException
-	 */
-	private HttpResponse<String> send(HttpRequest request) throws IOException, InterruptedException {
-		return HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
-	}
-
 	@Override
 	public void openIdInBrowser(String id) {
 		if (hostServices == null) {
@@ -245,6 +233,18 @@ public class JiraDataServiceImpl implements DataService {
 			hostServices.showDocument(urlBuilder.toString());
 		}
 
+	}
+
+	/**
+	 * Send the HttpRequest and get a HttpResponse
+	 *
+	 * @param request {@link HttpRequest}
+	 * @return {@link HttpResponse}
+	 * @throws IOException          IOException
+	 * @throws InterruptedException InterruptedException
+	 */
+	private HttpResponse<String> send(HttpRequest request) throws IOException, InterruptedException {
+		return HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
 	}
 
 }
