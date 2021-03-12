@@ -16,7 +16,7 @@ The desktop application is written with JavaFX and is generated as native using 
 
 ### Jira Extension
 
-The Jira extension can be activated via scc.properties. This will expand the Add input field. If a Jira ID is recognized after an input (only one word with -), the data record is loaded via the Jira API and the name and person Days are filled. Using the prefix jql: a JQL query can also serve as a basis. If no value is set for the person days, these will not be filled automatically.
+The Jira extension can be activated via scc.properties. This will expand the Add input field. If a Jira ID is recognized after an input (only one word with -), the data record is loaded via the Jira API and the name and person Days are filled. Using the prefix jql: a JQL query can also serve as a basis. If no value is set for the person days, these will not be filled automatically. The open sprints of a configured project are displayed in a dialog and after selecting a sprint, the open issues are loaded and placed in the table. The Jira Issue can be opened in the browser via the context menu.
 
 
 *scc.properties*:
@@ -34,6 +34,7 @@ The Jira extension can be activated via scc.properties. This will expand the Add
 | jira.field.name       | summary | Name field of Jira rest response                                | summary                           |
 | jira.field.key        | key     | Key field of Jira rest response                                 | key                               |
 | jira.field.personDays |         | Name field of Jira rest response                                | customfield_10106                 |
+| jira.browser          |         | Open Browser command for commandline                            | open (MacOS)                      |
 
 
 ## Installtion

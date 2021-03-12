@@ -15,6 +15,7 @@
  */
 package de.salzpaten.tools.scc.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -26,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.JsonArray;
@@ -57,6 +60,8 @@ public class JiraDataServiceImpl implements DataService {
 	private static final String OPEN_ISSUES_FROM_SPRINT_JQL = "Project=%s AND sprint=%s AND resolution = Unresolved AND issuetype not in subTaskIssueTypes()";
 
 	private HostServices hostServices;
+
+	private boolean isWindows = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).startsWith("windows");
 
 	private JiraProperties jiraProperties;
 
@@ -226,13 +231,11 @@ public class JiraDataServiceImpl implements DataService {
 			}
 			urlBuilder.append("browse/").append(id);
 
-			final ClipboardContent content = new ClipboardContent();
-			content.putString(urlBuilder.toString());
-			Clipboard.getSystemClipboard().setContent(content);
-
-			hostServices.showDocument(urlBuilder.toString());
+			// GraalVM workaround of hostServices.showDocument(urlBuilder.toString());
+			if (jiraProperties.getBrowser() != null && !"".equals(jiraProperties.getBrowser().trim())) {
+				showDocument(urlBuilder.toString());
+			}
 		}
-
 	}
 
 	/**
@@ -245,6 +248,30 @@ public class JiraDataServiceImpl implements DataService {
 	 */
 	private HttpResponse<String> send(HttpRequest request) throws IOException, InterruptedException {
 		return HttpClient.newBuilder().build().send(request, BodyHandlers.ofString());
+	}
+
+	/**
+	 * Open a browser window, if jira.browser is set. Workaround for GraalVM
+	 *
+	 * @param uri Uri
+	 */
+	private void showDocument(String uri) {
+		String command = String.format("%s %s", jiraProperties.getBrowser(), uri);
+		ProcessBuilder builder = new ProcessBuilder();
+		if (isWindows) {
+			builder.command("cmd.exe", "/c", command);
+		} else {
+			builder.command("sh", "-c", command);
+		}
+		builder.directory(new File(System.getProperty("user.home")));
+		try {
+			builder.start();
+		} catch (IOException ex) {
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+			final ClipboardContent content = new ClipboardContent();
+			content.putString(uri);
+			Clipboard.getSystemClipboard().setContent(content);
+		}
 	}
 
 }

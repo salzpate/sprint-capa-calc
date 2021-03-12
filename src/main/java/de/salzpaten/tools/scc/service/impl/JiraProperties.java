@@ -35,7 +35,7 @@ public class JiraProperties implements Serializable {
 
 	private static final String REST_API = "rest/api/";
 
-	private static final long serialVersionUID = 677357818442914548L;
+	private static final long serialVersionUID = -2605780182236023908L;
 
 	private Integer agileBoard;
 
@@ -48,6 +48,8 @@ public class JiraProperties implements Serializable {
 	private String authMethod;
 
 	private String authToken;
+
+	private String browser;
 
 	private boolean enabled;
 
@@ -121,6 +123,10 @@ public class JiraProperties implements Serializable {
 		return authToken;
 	}
 
+	public String getBrowser() {
+		return browser;
+	}
+
 	public String getFieldKey() {
 		final String key;
 		if (fieldName == null || "".equals(fieldKey)) {
@@ -177,6 +183,10 @@ public class JiraProperties implements Serializable {
 		this.authToken = authToken;
 	}
 
+	public void setBrowser(String browser) {
+		this.browser = browser;
+	}
+
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
@@ -201,8 +211,8 @@ public class JiraProperties implements Serializable {
 	public String toString() {
 		return "JiraProperties [agileBoard=" + agileBoard + ", agileVersion=" + agileVersion + ", apiProject="
 				+ apiProject + ", apiVersion=" + apiVersion + ", authMethod=" + authMethod + ", authToken=" + authToken
-				+ ", enabled=" + enabled + ", fieldName=" + fieldName + ", fieldPersonDays=" + fieldPersonDays
-				+ ", url=" + url + "]";
+				+ ", browser=" + browser + ", enabled=" + enabled + ", fieldKey=" + fieldKey + ", fieldName="
+				+ fieldName + ", fieldPersonDays=" + fieldPersonDays + ", url=" + url + "]";
 	}
 
 }
