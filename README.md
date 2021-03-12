@@ -21,6 +21,7 @@ The Jira extension can be activated via scc.properties. This will expand the Add
 ![SCC](https://user-images.githubusercontent.com/57270302/110973613-beba2700-835d-11eb-8c7b-3d26eded9da5.png "SCC JIRA")
 
 
+
 *scc.properties*:
 
 | Name                  | Default | Desciption                                                      | Example                           |
