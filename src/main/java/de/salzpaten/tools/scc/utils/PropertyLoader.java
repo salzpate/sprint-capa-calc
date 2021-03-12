@@ -63,6 +63,7 @@ public class PropertyLoader {
 			jiraProperties.setFieldName(prop.getProperty("jira.field.name", "summary"));
 			jiraProperties.setFieldPersonDays(prop.getProperty("jira.field.personDays", ""));
 			jiraProperties.setAgileVersion(prop.getProperty("jira.agile.version"));
+			jiraProperties.setBrowser(prop.getProperty("jira.browser"));
 			String boardId = prop.getProperty("jira.agile.board", null);
 			if (boardId != null) {
 				try {
