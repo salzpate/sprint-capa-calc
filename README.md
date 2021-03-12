@@ -3,7 +3,7 @@ A tool for calculating sprint capacities in a front-end and back-end team.
 
 The desktop application is written with JavaFX and is generated as native using GraalVM.
 
-![SCC](https://user-images.githubusercontent.com/57270302/109552345-f01b3300-7ad1-11eb-9d07-e53022e3b1ea.png "SCC")
+![SCC](https://user-images.githubusercontent.com/57270302/110973591-b7931900-835d-11eb-91d5-5723fdfae766.png "SCC")
 
 ## Features
 
@@ -17,6 +17,8 @@ The desktop application is written with JavaFX and is generated as native using 
 ### Jira Extension
 
 The Jira extension can be activated via scc.properties. This will expand the Add input field. If a Jira ID is recognized after an input (only one word with -), the data record is loaded via the Jira API and the name and person Days are filled. Using the prefix jql: a JQL query can also serve as a basis. If no value is set for the person days, these will not be filled automatically. The open sprints of a configured project are displayed in a dialog and after selecting a sprint, the open issues are loaded and placed in the table. The Jira Issue can be opened in the browser via the context menu.
+
+![SCC](https://user-images.githubusercontent.com/57270302/110973613-beba2700-835d-11eb-8c7b-3d26eded9da5.png "SCC JIRA")
 
 
 *scc.properties*:
