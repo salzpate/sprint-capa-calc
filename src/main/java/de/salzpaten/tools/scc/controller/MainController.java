@@ -285,7 +285,6 @@ public class MainController implements Initializable {
 
 			@Override
 			protected Void call() throws Exception {
-				System.out.println(jqlText);
 				Platform.runLater(() -> pJiraIndicator.setVisible(true));
 				try {
 					List<CalcTableData> calcTableDataList;

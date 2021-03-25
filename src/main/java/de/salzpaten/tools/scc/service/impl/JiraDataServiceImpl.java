@@ -137,7 +137,6 @@ public class JiraDataServiceImpl implements DataService {
 		List<CalcTableData> dataList = new ArrayList<>();
 		final String issueUri = String.format("search/?jql=%s&%s", URLEncoder.encode(value, StandardCharsets.UTF_8),
 				buildFieldParameter());
-		System.out.println(issueUri);
 		HttpResponse<String> response = send(buildHttpRequest(issueUri));
 		if (response.statusCode() == 200) {
 			JsonElement root = JsonParser.parseString(response.body());
