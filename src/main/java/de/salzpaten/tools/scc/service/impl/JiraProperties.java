@@ -129,7 +129,7 @@ public class JiraProperties implements Serializable {
 
 	public String getFieldKey() {
 		final String key;
-		if (fieldName == null || "".equals(fieldKey)) {
+		if (fieldKey == null || "".equals(fieldKey)) {
 			key = DEFAULT_KEY;
 		} else {
 			key = fieldKey;
