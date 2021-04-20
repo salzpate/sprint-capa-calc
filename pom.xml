@@ -3,7 +3,7 @@
 
   <groupId>de.salzpaten.tools</groupId>
   <artifactId>sprintcapacalc</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <packaging>jar</packaging>
 
   <name>SprintCapaCalc</name>
@@ -19,11 +19,11 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>16</maven.compiler.source>
+    <maven.compiler.target>16</maven.compiler.target>
     <org-openjfx.version>16</org-openjfx.version>
-    <org-openjfx-javafx-maven-plugin.version>0.0.5</org-openjfx-javafx-maven-plugin.version>
-    <com-gluonhq-client-maven-plugin.version>0.1.38</com-gluonhq-client-maven-plugin.version>
+    <org-openjfx-javafx-maven-plugin.version>0.0.6</org-openjfx-javafx-maven-plugin.version>
+    <com-gluonhq-client-maven-plugin.version>0.1.39</com-gluonhq-client-maven-plugin.version>
     <com-google-code-gson.version>2.8.6</com-google-code-gson.version>
     <org-junit-jupiter.version>5.7.1</org-junit-jupiter.version>
     <org-junit-platform.version>1.7.1</org-junit-platform.version>
@@ -111,6 +111,7 @@
         <configuration>
           <target>host</target>
           <mainClass>${module.name}/${main.class}</mainClass>
+          <nativeImageArgs>-H:+AllowIncompleteClasspath</nativeImageArgs>
           <bundlesList>
             <list>de.salzpaten.tools.scc.controller.main</list>
           </bundlesList>

@@ -46,7 +46,7 @@ public class SccApp extends Application {
 	/**
 	 * Version Number
 	 */
-	private static final String VERSION = "1.1.1";
+	private static final String VERSION = "1.1.2";
 
 	public static void main(String[] args) {
 		launch();
