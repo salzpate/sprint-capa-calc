@@ -19,8 +19,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>16</maven.compiler.source>
-    <maven.compiler.target>16</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <org-openjfx.version>16</org-openjfx.version>
     <org-openjfx-javafx-maven-plugin.version>0.0.6</org-openjfx-javafx-maven-plugin.version>
     <com-gluonhq-client-maven-plugin.version>0.1.39</com-gluonhq-client-maven-plugin.version>
