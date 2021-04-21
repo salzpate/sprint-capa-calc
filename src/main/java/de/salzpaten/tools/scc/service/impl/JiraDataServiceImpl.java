@@ -22,6 +22,7 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -113,6 +114,25 @@ public class JiraDataServiceImpl implements DataService {
 	@Override
 	public String buildOpenTaskFromSprintJql(int id) {
 		return String.format(OPEN_ISSUES_FROM_SPRINT_JQL, jiraProperties.getApiProject(), id);
+	}
+
+	/**
+	 * Builds a update {@link HttpRequest}
+	 *
+	 * @param uri part of the uri
+	 * @return {@link HttpRequest}
+	 */
+	private HttpRequest buildUpdateHttpRequest(String uri, String body) {
+		return HttpRequest.newBuilder().uri(URI.create(jiraProperties.getApiUrlWithVersion() + uri))
+				.timeout(Duration.ofMinutes(1)).header("Content-Type", "application/json")
+				.setHeader("Authorization", jiraProperties.getAuthorizationHeader()).PUT(BodyPublishers.ofString(body)).build();
+	}
+
+	@Override
+	public void changePriority(String id, String priority) throws IOException, InterruptedException {
+		final String issueUri = String.format("issue/%s", URLEncoder.encode(id, StandardCharsets.UTF_8));
+		final String body = String.format("{\"update\":{\"priority\":[{\"set\":{\"name\" : \"%s\"}}]}}", priority);
+		send(buildUpdateHttpRequest(issueUri, body));
 	}
 
 	@Override

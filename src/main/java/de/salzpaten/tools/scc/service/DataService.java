@@ -38,6 +38,14 @@ public interface DataService {
 	String buildOpenTaskFromSprintJql(int id);
 
 	/**
+	 * Change the priority by Id
+	 *
+	 * @param id ID
+	 * @param priority Priority
+	 */
+	void changePriority(String id, String priority) throws IOException, InterruptedException;
+
+	/**
 	 * Getting {@link CalcTableData} by Id
 	 *
 	 * @param id Id

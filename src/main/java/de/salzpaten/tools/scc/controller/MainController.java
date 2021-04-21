@@ -61,11 +61,13 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.Clipboard;
@@ -146,6 +148,16 @@ public class MainController implements Initializable {
 	private ObjectBinding<Double> plannedCapaPersonDaysBinding;
 
 	private CalcTableData plannedCapaTableData = new CalcTableData("Planned capacity", 0d, 0d, 0d, true);
+
+	private RadioMenuItem prioHighestMenuItem = new RadioMenuItem("Highest", SccViewUtils.buildSVG("Highest"));
+
+	private RadioMenuItem prioHighMenuItem = new RadioMenuItem("High", SccViewUtils.buildSVG("High"));
+
+	private RadioMenuItem prioLowestMenuItem = new RadioMenuItem("Lowest", SccViewUtils.buildSVG("Lowest"));
+
+	private RadioMenuItem prioLowMenuItem = new RadioMenuItem("Low", SccViewUtils.buildSVG("Low"));
+
+	private RadioMenuItem prioMediumMenuItem = new RadioMenuItem("Medium", SccViewUtils.buildSVG("Medium"));
 
 	@FXML
 	private ProgressIndicator pSprintIndicator;
@@ -265,6 +277,42 @@ public class MainController implements Initializable {
 					sprintComboBox.getItems().clear();
 					sprintComboBox.getItems().addAll(sprintList);
 					sprintComboBox.getSelectionModel().select(0);
+				});
+			}
+		};
+	}
+
+	/**
+	 * Generates a task that loads sprints from Jira
+	 *
+	 * @param jqlText jqlText
+	 * @return Task
+	 */
+	private Task<Void> updateJiraIssuePriority(String key, String priorityName, CalcTableData data) {
+		return new Task<Void>() {
+
+			@Override
+			protected Void call() throws Exception {
+				Platform.runLater(() -> pSprintIndicator.setVisible(true));
+				try {
+					dataService.changePriority(key, priorityName);;
+				} catch (IOException | InterruptedException e) {
+					LOGGER.log(Level.SEVERE, e.getMessage(), e);
+					Platform.runLater(() -> showErrorAlert(e, "Error updating priority"));
+					throw e;
+				}
+				return null;
+			}
+
+			@Override
+			protected void done() {
+				Platform.runLater(() -> pSprintIndicator.setVisible(false));
+			}
+
+			@Override
+			protected void succeeded() {
+				Platform.runLater(() -> {
+					data.setPriorityName(priorityName);
 				});
 			}
 		};
@@ -457,32 +505,24 @@ public class MainController implements Initializable {
 		headItem.getStyleClass().clear();
 		headItem.getStyleClass().add("head-menu-item");
 
-		MenuItem removeItem = new MenuItem("Remove item");
+		MenuItem removeItem = new MenuItem("Remove item", SccViewUtils.buildSVG("Remove"));
 		removeItem.setOnAction(e -> onActionRemove());
 
-		MenuItem increaseFontSize = new MenuItem("Increase font size");
+		MenuItem increaseFontSize = new MenuItem("Increase font size", SccViewUtils.buildSVG("Plus"));
 		increaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.ADD, KeyCombination.SHORTCUT_DOWN));
 		increaseFontSize.setOnAction(e -> onActionIncreaseFontSize());
 
-		MenuItem decreaseFontSize = new MenuItem("Decrease font size");
+		MenuItem decreaseFontSize = new MenuItem("Decrease font size", SccViewUtils.buildSVG("Minus"));
 		decreaseFontSize.setAccelerator(new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN));
 		decreaseFontSize.setOnAction(e -> onActionDecreaseFontSize());
 
-		MenuItem defaultFontSize = new MenuItem("Default font size");
+		MenuItem defaultFontSize = new MenuItem("Default font size", SccViewUtils.buildSVG("Dots"));
 		defaultFontSize.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
 		defaultFontSize.setOnAction(e -> onActionDefaultFontSize());
 
-		MenuItem textListItem = new MenuItem("Copy items as list");
-		textListItem.setOnAction(e -> onActionCopyTableDataAsTextList());
-
-		MenuItem copyItem = new MenuItem("Copy items as table");
-		copyItem.setOnAction(e -> onActionCopyTableData());
-
-		MenuItem copyMarkdownItem = new MenuItem("Copy items as markdown");
-		copyMarkdownItem.setOnAction(e -> onActionCopyTableDataAsMarkdown());
-
 		contextMenu = new ContextMenu(headItem, removeItem, new SeparatorMenuItem(), increaseFontSize, defaultFontSize,
-				decreaseFontSize, new SeparatorMenuItem(), textListItem, copyItem, copyMarkdownItem);
+				decreaseFontSize);
+		contextMenu.setOnShowing(e -> onShowingContext());
 
 		tableData = FXCollections.observableArrayList();
 		mainTable.setItems(tableData);
@@ -702,6 +742,44 @@ public class MainController implements Initializable {
 		});
 	}
 
+	private void onChangePriorityName(String priorityName) {
+		if (mainTable.getSelectionModel().getSelectedItem() != null) {
+			CalcTableData data = mainTable.getSelectionModel().getSelectedItem();
+			if (!priorityName.equals(data.getPriorityName())) {
+				new Thread(updateJiraIssuePriority(data.getKey(), priorityName, data)).start();
+			}
+		}
+	}
+
+	private void onShowingContext() {
+		if (mainTable.getSelectionModel().getSelectedItem() != null) {
+			CalcTableData data = mainTable.getSelectionModel().getSelectedItem();
+			switch (data.getPriorityName()) {
+			case "Highest":
+				prioHighestMenuItem.setSelected(true);
+				break;
+			case "High":
+				prioHighMenuItem.setSelected(true);
+				break;
+			case "Low":
+				prioLowMenuItem.setSelected(true);
+				break;
+			case "Lowest":
+				prioLowestMenuItem.setSelected(true);
+				break;
+			default:
+				prioMediumMenuItem.setSelected(true);
+				break;
+			}
+		} else {
+			prioHighestMenuItem.setSelected(false);
+			prioHighMenuItem.setSelected(false);
+			prioLowMenuItem.setSelected(false);
+			prioLowestMenuItem.setSelected(false);
+			prioMediumMenuItem.setSelected(false);
+		}
+	}
+
 	public void setDataService(DataService dataService) {
 		this.dataService = dataService;
 		if (dataService.isEnabled()) {
@@ -714,10 +792,30 @@ public class MainController implements Initializable {
 			tcType.setVisible(true);
 			tcPrio.setVisible(true);
 
-			openInBrowser = new MenuItem("Open in Browser");
+			openInBrowser = new MenuItem("Open in Browser", SccViewUtils.buildSVG("Link"));
 			openInBrowser.setOnAction(e -> onActionOpenInBrowser());
 			contextMenu.getItems().add(1, new SeparatorMenuItem());
 			contextMenu.getItems().add(1, openInBrowser);
+
+			ToggleGroup prioToggleGroup = new ToggleGroup();
+			prioHighestMenuItem.setToggleGroup(prioToggleGroup);
+			prioHighestMenuItem.setOnAction(e -> onChangePriorityName("Highest"));
+			prioHighMenuItem.setToggleGroup(prioToggleGroup);
+			prioHighMenuItem.setOnAction(e -> onChangePriorityName("High"));
+			prioMediumMenuItem.setToggleGroup(prioToggleGroup);
+			prioMediumMenuItem.setOnAction(e -> onChangePriorityName("Medium"));
+			prioLowMenuItem.setToggleGroup(prioToggleGroup);
+			prioLowMenuItem.setOnAction(e -> onChangePriorityName("Low"));
+			prioLowestMenuItem.setToggleGroup(prioToggleGroup);
+			prioLowestMenuItem.setOnAction(e -> onChangePriorityName("Lowest"));
+
+			contextMenu.getItems().add(4, new SeparatorMenuItem());
+			contextMenu.getItems().add(5, prioLowestMenuItem);
+			contextMenu.getItems().add(5, prioLowMenuItem);
+			contextMenu.getItems().add(5, prioMediumMenuItem);
+			contextMenu.getItems().add(5, prioHighMenuItem);
+			contextMenu.getItems().add(5, prioHighestMenuItem);
+			contextMenu.setOnShowing(e -> onShowingContext());
 		}
 	}
 
