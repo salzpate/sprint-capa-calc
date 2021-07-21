@@ -18,7 +18,7 @@ jobs:
         id: setup-graalvm
         uses: DeLaGuardo/setup-graalvm@master
         with:
-          graalvm-version: '21.1.0.java11'
+          graalvm-version: '21.2.0.java11'
       - name: Install native-image component
         run: gu install native-image
       - name: Make staging directory
@@ -28,9 +28,9 @@ jobs:
       - name: Copy JAR to staging
         run: cp target/*.jar staging
       - name: Gluon Build
-        run: mvn client:build
+        run: mvn gluonfx:build
       - name: Copy native client to staging
-        run: cp -r target/client/x86_64-darwin/SprintCapaCalc* staging
+        run: cp -r target/gluonfx/x86_64-darwin/SprintCapaCalc* staging
       - name: Upload
         uses: actions/upload-artifact@v2
         with:

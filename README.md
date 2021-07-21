@@ -1,4 +1,4 @@
-# Sprint Capacity Calculator
+gluonfx:build# Sprint Capacity Calculator
 A tool for calculating sprint capacities in a front-end and back-end team.
 
 The desktop application is written with JavaFX and is generated as native using GraalVM.
@@ -55,13 +55,13 @@ mvn javafx:run
 The native image is generated via Gluon Client plugin for Maven. The GRAALVM_HOME variable must be set:
 
 ```sheel
-mvn client:build
+mvn gluonfx:build
 ```
 
 The binary is created in the *target/client/{osname}/* directory and can be started there directly. The Gluon Client plugin for Maven can also be used:
 
 ```sheel
-mvn client:run
+mvn gluonfx:run
 ```
 
 ## Reference

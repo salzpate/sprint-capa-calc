@@ -23,10 +23,10 @@
     <maven.compiler.target>11</maven.compiler.target>
     <org-openjfx.version>16</org-openjfx.version>
     <org-openjfx-javafx-maven-plugin.version>0.0.6</org-openjfx-javafx-maven-plugin.version>
-    <com-gluonhq-client-maven-plugin.version>0.1.39</com-gluonhq-client-maven-plugin.version>
-    <com-google-code-gson.version>2.8.6</com-google-code-gson.version>
-    <org-junit-jupiter.version>5.7.1</org-junit-jupiter.version>
-    <org-junit-platform.version>1.7.1</org-junit-platform.version>
+    <com-gluonhq-gluonfx-maven-plugin.version>1.0.3</com-gluonhq-gluonfx-maven-plugin.version>
+    <com-google-code-gson.version>2.8.7</com-google-code-gson.version>
+    <org-junit-jupiter.version>5.7.2</org-junit-jupiter.version>
+    <org-junit-platform.version>1.7.2</org-junit-platform.version>
     <module.name>de.salzpaten.tools.scc</module.name>
     <main.class>de.salzpaten.tools.scc.SccApp</main.class>
   </properties>
@@ -100,18 +100,18 @@
         <version>${org-openjfx-javafx-maven-plugin.version}</version>
         <configuration>
           <jlinkImageName>${module.name}</jlinkImageName>
-          <launcher>launcher</launcher>
+          <launcher>scc</launcher>
           <mainClass>${module.name}/${main.class}</mainClass>
         </configuration>
       </plugin>
       <plugin>
         <groupId>com.gluonhq</groupId>
-        <artifactId>client-maven-plugin</artifactId>
-        <version>${com-gluonhq-client-maven-plugin.version}</version>
+        <artifactId>gluonfx-maven-plugin</artifactId>
+        <version>${com-gluonhq-gluonfx-maven-plugin.version}</version>
         <configuration>
           <target>host</target>
           <mainClass>${module.name}/${main.class}</mainClass>
-          <nativeImageArgs>-H:+AllowIncompleteClasspath</nativeImageArgs>
+          <nativeImageArgs>-H:EnableURLProtocols=https --enable-all-security-services -H:+JNI</nativeImageArgs>
           <bundlesList>
             <list>de.salzpaten.tools.scc.controller.main</list>
           </bundlesList>
