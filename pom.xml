@@ -29,6 +29,8 @@
     <org-junit-platform.version>1.7.2</org-junit-platform.version>
     <module.name>de.salzpaten.tools.scc</module.name>
     <main.class>de.salzpaten.tools.scc.SccApp</main.class>
+    <sonar.organization>salzpate</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
   <dependencies>
 
