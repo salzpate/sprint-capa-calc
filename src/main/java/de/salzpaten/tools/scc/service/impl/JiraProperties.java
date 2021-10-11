@@ -73,7 +73,7 @@ public class JiraProperties implements Serializable {
 				urlBuilder.append("/");
 			}
 			urlBuilder.append(REST_AGILE);
-			if (agileVersion == null || "".equals("")) {
+			if (agileVersion == null || "".equals(agileVersion)) {
 				urlBuilder.append(DEFAULT_VERSION).append("/");
 			} else {
 				urlBuilder.append(agileVersion).append("/");
@@ -98,7 +98,7 @@ public class JiraProperties implements Serializable {
 				urlBuilder.append("/");
 			}
 			urlBuilder.append(REST_API);
-			if (apiVersion == null || "".equals("")) {
+			if (apiVersion == null || "".equals(apiVersion)) {
 				urlBuilder.append(DEFAULT_VERSION).append("/");
 			} else {
 				urlBuilder.append(apiVersion).append("/");
