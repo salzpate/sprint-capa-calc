@@ -20,6 +20,7 @@
 module de.salzpaten.tools.scc {
 	requires java.logging;
 
+	requires javafx.base;
 	requires transitive javafx.graphics;
 	requires javafx.controls;
 	requires javafx.fxml;
