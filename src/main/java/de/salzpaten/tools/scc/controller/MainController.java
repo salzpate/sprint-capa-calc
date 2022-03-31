@@ -187,6 +187,9 @@ public class MainController implements Initializable {
 	private TableColumn<CalcTableData, String> tcName;
 
 	@FXML
+	private TableColumn<CalcTableData, String> tcComment;
+
+	@FXML
 	private TableColumn<CalcTableData, Double> tcPersonDays;
 
 	@FXML
@@ -295,7 +298,7 @@ public class MainController implements Initializable {
 			protected Void call() throws Exception {
 				Platform.runLater(() -> pSprintIndicator.setVisible(true));
 				try {
-					dataService.changePriority(key, priorityName);;
+					dataService.changePriority(key, priorityName);
 				} catch (IOException | InterruptedException e) {
 					LOGGER.log(Level.SEVERE, e.getMessage(), e);
 					Platform.runLater(() -> showErrorAlert(e, "Error updating priority"));
@@ -311,9 +314,7 @@ public class MainController implements Initializable {
 
 			@Override
 			protected void succeeded() {
-				Platform.runLater(() -> {
-					data.setPriorityName(priorityName);
-				});
+				Platform.runLater(() -> data.setPriorityName(priorityName));
 			}
 		};
 	}
@@ -342,8 +343,7 @@ public class MainController implements Initializable {
 						calcTableDataList = List.of(dataService.getCalcTableData(jqlText.trim()));
 					}
 					filteredList = calcTableDataList.stream()
-							.filter(c -> tableData.stream().noneMatch(t -> c.getName().equals(t.getName())))
-							.collect(Collectors.toList());
+							.filter(c -> tableData.stream().noneMatch(t -> c.getName().equals(t.getName()))).toList();
 				} catch (IOException | InterruptedException e) {
 					LOGGER.log(Level.SEVERE, e.getMessage(), e);
 					Platform.runLater(() -> showErrorAlert(e, String.format("Could not load data with '%s'", jqlText)));
@@ -467,6 +467,8 @@ public class MainController implements Initializable {
 		tcKey.setCellFactory(TextFieldTableCell.forTableColumn());
 		tcName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 		tcName.setCellFactory(TextFieldTableCell.forTableColumn());
+		tcComment.setCellValueFactory(cellData -> cellData.getValue().commentProperty());
+		tcComment.setCellFactory(TextFieldTableCell.forTableColumn());
 		tcPrio.setCellValueFactory(cellData -> cellData.getValue().priorityNameProperty());
 		tcPrio.setCellFactory(cell -> new PrioSvgImageCell());
 		tcPersonDays.setCellValueFactory(cellData -> cellData.getValue().personDaysProperty().asObject());
@@ -544,7 +546,7 @@ public class MainController implements Initializable {
 	}
 
 	private void initSprintAlert() {
-		sprintComboBox = new ComboBox<ComboBoxItem>(FXCollections.observableArrayList());
+		sprintComboBox = new ComboBox<>(FXCollections.observableArrayList());
 		pSprintIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
 		pSprintIndicator.setVisible(false);
 		pSprintIndicator.setMaxHeight(24d);
@@ -737,9 +739,9 @@ public class MainController implements Initializable {
 	private void onActionSprintImport() {
 		new Thread(buildJiraSprintTask()).start();
 		Optional<ComboBoxItem> result = sprintDialog.showAndWait();
-		result.ifPresent(item -> {
-			new Thread(buildJiraTask(dataService.buildOpenTaskFromSprintJql(item.getKey()))).start();
-		});
+		result.ifPresent(item ->
+			new Thread(buildJiraTask(dataService.buildOpenTaskFromSprintJql(item.getKey()))).start()
+		);
 	}
 
 	private void onChangePriorityName(String priorityName) {

@@ -49,7 +49,8 @@ public final class SccUtils {
 	public static String buildTableDataAsListText(List<CalcTableData> list) {
 		return Optional.ofNullable(list).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
 				.map(d -> String.format("* %s%s (%.1f|%.1f|%.1f) PD %s", emptyStringIfNullOrWithSpace(d.getKey()),
-						emptyStringIfNull(d.getName()), d.getPersonDays(), d.getBackend(), d.getFrontend(),
+						emptyStringIfNull(d.getName()) + emptyStringIfNullOrWithPreSpace(d.getComment()),
+						d.getPersonDays(), d.getBackend(), d.getFrontend(),
 						trueOrFalseString(d.isActive(), "", "not active")))
 				.collect(Collectors.joining("\n"));
 	}
@@ -68,7 +69,7 @@ public final class SccUtils {
 				Optional.ofNullable(list).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull).map(d -> {
 					if (d.isActive()) {
 						return String.format("| %s%s | %.1f | %.1f | %.1f |", emptyStringIfNullOrWithSpace(d.getKey()),
-								emptyStringIfNull(d.getName()), d.getPersonDays(), d.getBackend(), d.getFrontend());
+								emptyStringIfNull(d.getName()) + emptyStringIfNullOrWithPreSpace(d.getComment()), d.getPersonDays(), d.getBackend(), d.getFrontend());
 					} else {
 						return String.format("| ~~%s%s~~ | ~~%.1f~~ | ~~%.1f~~ | ~~%.1f~~ |",
 								emptyStringIfNullOrWithSpace(d.getKey()), emptyStringIfNull(d.getName()),
@@ -90,7 +91,7 @@ public final class SccUtils {
 		strBuilder.append("---------------------------------------------------------------------\n");
 		strBuilder.append(Optional.ofNullable(list).orElseGet(Collections::emptyList).stream().filter(Objects::nonNull)
 				.map(d -> String.format("%s %-50s %4.1f %4.1f %4.1f", trueOrFalseString(d.isActive(), "[x]", "[ ]"),
-						emptyStringIfNullOrWithSpace(d.getKey()) + emptyStringIfNull(d.getName()), d.getPersonDays(),
+						emptyStringIfNullOrWithSpace(d.getKey()) + emptyStringIfNull(d.getName()) + emptyStringIfNullOrWithPreSpace(d.getComment()), d.getPersonDays(),
 						d.getBackend(), d.getFrontend()))
 				.collect(Collectors.joining("\n")));
 		return strBuilder.toString();
@@ -108,6 +109,22 @@ public final class SccUtils {
 			notNullString = "";
 		} else {
 			notNullString = value;
+		}
+		return notNullString;
+	}
+
+	/**
+	 * Returns an empty string if null, otherwise the original value is returned
+	 *
+	 * @param value String value
+	 * @return original value or empty string
+	 */
+	public static String emptyStringIfNullOrWithPreSpace(String value) {
+		final String notNullString;
+		if (value == null || "".equals(value.trim())) {
+			notNullString = "";
+		} else {
+			notNullString = " - " + value;
 		}
 		return notNullString;
 	}

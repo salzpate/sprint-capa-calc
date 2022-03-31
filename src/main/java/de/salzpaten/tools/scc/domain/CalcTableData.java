@@ -41,6 +41,11 @@ public class CalcTableData {
 	private DoubleProperty backend = new SimpleDoubleProperty(0);
 
 	/**
+	 * Comment
+	 */
+	private StringProperty comment = new SimpleStringProperty("");
+
+	/**
 	 * Needed person days of front-end members
 	 */
 	private DoubleProperty frontend = new SimpleDoubleProperty(0);
@@ -90,12 +95,20 @@ public class CalcTableData {
 		return backend;
 	}
 
+	public StringProperty commentProperty() {
+		return comment;
+	}
+
 	public DoubleProperty frontendProperty() {
 		return frontend;
 	}
 
 	public double getBackend() {
 		return backend.get();
+	}
+
+	public String getComment() {
+		return comment.get();
 	}
 
 	public double getFrontend() {
@@ -154,6 +167,10 @@ public class CalcTableData {
 		this.backend.set(backend);
 	}
 
+	public void setComment(String comment) {
+		this.comment.set(comment);
+	}
+
 	public void setFrontend(double frontend) {
 		this.frontend.set(frontend);
 	}
@@ -180,7 +197,7 @@ public class CalcTableData {
 
 	@Override
 	public String toString() {
-		return "CalcTableData [active=" + active.get() + ", backend=" + backend.get() + ", frontend=" + frontend.get()
+		return "CalcTableData [active=" + active.get() + ", backend=" + backend.get() + ", comment=" + comment.get() + ", frontend=" + frontend.get()
 				+ ", issuetypeName=" + issuetypeName.get() + ", key=" + key.get() + ", name=" + name.get()
 				+ ", personDays=" + personDays.get() + ", priorityName=" + priorityName.get() + "]";
 	}
