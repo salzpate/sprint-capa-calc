@@ -21,12 +21,12 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <org-openjfx.version>18</org-openjfx.version>
+    <org-openjfx.version>18.0.2</org-openjfx.version>
     <org-openjfx-javafx-maven-plugin.version>0.0.8</org-openjfx-javafx-maven-plugin.version>
-    <com-gluonhq-gluonfx-maven-plugin.version>1.0.12</com-gluonhq-gluonfx-maven-plugin.version>
+    <com-gluonhq-gluonfx-maven-plugin.version>1.0.14</com-gluonhq-gluonfx-maven-plugin.version>
     <com-google-code-gson.version>2.9.0</com-google-code-gson.version>
-    <org-junit-jupiter.version>5.8.2</org-junit-jupiter.version>
-    <org-junit-platform.version>1.8.2</org-junit-platform.version>
+    <org-junit-jupiter.version>5.9.0</org-junit-jupiter.version>
+    <org-junit-platform.version>1.9.0</org-junit-platform.version>
     <module.name>de.salzpaten.tools.scc</module.name>
     <main.class>de.salzpaten.tools.scc.SccApp</main.class>
     <sonar.organization>salzpate</sonar.organization>
