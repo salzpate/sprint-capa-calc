@@ -10,16 +10,18 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Visual Studio shell
         uses: egor-tensin/vs-shell@v1
       - name: Setup Graalvm
         id: setup-graalvm
-        uses: DeLaGuardo/setup-graalvm@master
+        uses: DeLaGuardo/setup-graalvm@5.0
         with:
-          graalvm-version: '22.0.0.2.java17'
+          graalvm: '22.2.0'
+          java: 'java17'
+          arch: 'amd64'
       - name: Install native-image component
         run: gu.cmd install native-image
       - name: Make staging directory
@@ -33,7 +35,7 @@ jobs:
       - name: Copy native client to staging
         run: cp -r target/gluonfx/x86_64-windows/*.exe staging
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Package
           path: staging
