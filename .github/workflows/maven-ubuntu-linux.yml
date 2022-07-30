@@ -23,7 +23,7 @@ jobs:
       - name: Copy JAR to staging
         run: cp target/*.jar staging
       - name: Gluon Build
-        run: mvn gluonfx:build
+        run: mvn gluonfx:build -X
       - name: Copy native client to staging
         run: cp -r target/gluonfx/x86_64-linux/SprintCapaCalc* staging
       - name: Upload
