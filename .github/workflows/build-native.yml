@@ -10,11 +10,18 @@ jobs:
           version: 'latest'
           java-version: '17'
           components: 'native-image'
-      - name: Example step
-        run: |
-          echo "GRAALVM_HOME: $GRAALVM_HOME"
-          echo "JAVA_HOME: $JAVA_HOME"
-          java --version
-          gu --version
-          native-image --version
-          mvn --version
+      - name: Make staging directory
+        run: mkdir staging
+      - name: Build JAR with Maven
+        run: mvn -B package
+      - name: Copy JAR to staging
+        run: cp target/*.jar staging
+      - name: Gluon Build
+        run: mvn gluonfx:build
+      - name: Copy native client to staging
+        run: cp -r target/gluonfx/x86_64-linux/SprintCapaCalc* staging
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: Package
+          path: staging
