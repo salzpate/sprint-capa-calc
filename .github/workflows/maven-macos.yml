@@ -10,19 +10,12 @@ jobs:
   build:
     runs-on: macOS-latest
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
       - uses: actions/checkout@v3
-      - name: Setup Graalvm
-        id: setup-graalvm
-        uses: DeLaGuardo/setup-graalvm@5.0
+      - uses: graalvm/setup-graalvm@v1
         with:
-          graalvm: '22.2.0'
-          java: 'java17'
-          arch: 'amd64'
-      - name: Install native-image component
-        run: gu install native-image
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
       - name: Make staging directory
         run: mkdir staging
       - name: Build JAR with Maven
